@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sync"
 )
 
 type SSConfig struct {
@@ -13,6 +14,7 @@ type SSConfig struct {
 	// LocalPort  string `json:"local_port"`
 	Password string `json:"password"`
 	Method   string `json:"method"` // encryption method
+	TestOK   bool
 }
 
 type Config struct {
@@ -22,10 +24,24 @@ type Config struct {
 func (config *Config) GetServerArray() (Servers []string) {
 	// ss://Method:Password@Server:ServerPort
 	for _, ss := range config.Servers {
-		Servers = append(Servers, fmt.Sprintf("ss://%s:%s@%s:%s",
-			ss.Method, ss.Password, ss.Server, ss.ServerPort))
+		Servers = append(Servers, fmt.Sprintf("TestOK: %t\t| ss://%s:%s@%s:%s",
+			ss.TestOK, ss.Method, ss.Password, ss.Server, ss.ServerPort))
 	}
 	return
+}
+
+func (config *Config) TestServers() {
+	var wg sync.WaitGroup
+	for idx := range config.Servers {
+		wg.Add(1)
+		go func(idx int) {
+			if _, err := wGetByShadowsocksProxy("http://google.com", config.Servers[idx].String()); err == nil {
+				config.Servers[idx].TestOK = true
+			}
+			wg.Done()
+		}(idx)
+	}
+	wg.Wait()
 }
 
 func ParseConfig(path string) (config *Config, err error) {
@@ -52,4 +68,8 @@ func (config Config) String() (str string) {
 		str += s + "\n"
 	}
 	return
+}
+
+func (ss SSConfig) String() string {
+	return fmt.Sprintf("ss://%s:%s@%s:%s", ss.Method, ss.Password, ss.Server, ss.ServerPort)
 }

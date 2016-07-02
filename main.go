@@ -22,10 +22,13 @@ func main() {
 		panic(ErrNoGuiConfigs)
 	}
 	fmt.Println(guiConfig)
-
-	if gfwList, err = ParseGFWList(guiConfig.GetServerArray()); err != nil {
-		panic(err)
-	}
-	fmt.Println(gfwList.GenDnsmasqServer("127.0.0.1:5353"))
-	fmt.Println(gfwList.GenDnsmasqIPset("gfwlist"))
+	guiConfig.TestServers()
+	fmt.Println(guiConfig)
+	/*
+		if gfwList, err = ParseGFWList(guiConfig.GetServerArray()); err != nil {
+			panic(err)
+		}
+		fmt.Println(gfwList.GenDnsmasqServer("127.0.0.1:5353"))
+		fmt.Println(gfwList.GenDnsmasqIPset("gfwlist"))
+	*/
 }

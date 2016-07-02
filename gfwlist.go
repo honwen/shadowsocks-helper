@@ -20,8 +20,8 @@ type GFWList struct {
 	Domains []string
 }
 
-func ParseGFWList(failSafeSS []string) (*GFWList, error) {
-	base64GFWList, err := wGetWithSSFailsafe(officalGFWListURL, failSafeSS)
+func ParseGFWList(SSfailSafe []string) (*GFWList, error) {
+	base64GFWList, err := wGetWithSSFailsafe(officalGFWListURL, SSfailSafe)
 	if err != nil {
 		return nil, err
 	}

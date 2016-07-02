@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"net/url"
 	"regexp"
@@ -37,11 +38,7 @@ func (gfwList *GFWList) GenDnsmasqIPset(ipset string) string {
 	var str bytes.Buffer
 	var w io.Writer = &str
 	for _, s := range gfwList.Domains {
-		io.WriteString(w, "ipset=/")
-		io.WriteString(w, s)
-		io.WriteString(w, "/")
-		io.WriteString(w, ipset)
-		io.WriteString(w, "\n")
+		io.WriteString(w, fmt.Sprintf("ipset=/%s/%s\n", s, ipset))
 	}
 	return str.String()
 }
@@ -50,11 +47,7 @@ func (gfwList *GFWList) GenDnsmasqServer(dns string) string {
 	var str bytes.Buffer
 	var w io.Writer = &str
 	for _, s := range gfwList.Domains {
-		io.WriteString(w, "server=/")
-		io.WriteString(w, s)
-		io.WriteString(w, "/")
-		io.WriteString(w, dns)
-		io.WriteString(w, "\n")
+		io.WriteString(w, fmt.Sprintf("server=/%s/%s\n", s, dns))
 	}
 	return str.String()
 }

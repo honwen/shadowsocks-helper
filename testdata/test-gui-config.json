@@ -1,0 +1,34 @@
+{
+    "configs":[
+        {
+            "server":"ss01.test.com",
+            "server_port":"50001",
+            "local_port":"1080",
+            "password":"PPAASS01",
+            "method":"rc4-md5",
+            "remarks":"ss01"
+        },
+        {
+            "server":"ss02.test.com",
+            "server_port":"50002",
+            "local_port":"1080",
+            "password":"PPAASS02",
+            "method":"rc4-md5",
+            "remarks":"ss02"
+        },
+        {
+            "server":"ss03.test.com",
+            "server_port":"50003",
+            "local_port":"1080",
+            "password":"PPAASS03",
+            "method":"rc4-md5",
+            "remarks":"ss03"
+        }
+    ],
+    "index":"0",
+    "global":false,
+    "enabled":true,
+    "shareOverLan":false,
+    "isDefault":false,
+    "localPort":"1080"
+}

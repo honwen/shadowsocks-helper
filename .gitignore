@@ -26,4 +26,6 @@ _testmain.go
 
 debug
 
+shadowsocks-helper*
+
 gui-config*.json

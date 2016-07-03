@@ -10,7 +10,7 @@
         },
         {
             "server":"ss02.test.com",
-            "server_port":"50002",
+            "server_port":50002,
             "local_port":"1080",
             "password":"PPAASS02",
             "method":"rc4-md5",

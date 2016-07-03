@@ -22,8 +22,7 @@ func main() {
 		panic(ErrNoGuiConfigs)
 	}
 	fmt.Println(guiConfig)
-	guiConfig.TestServers()
-	fmt.Println(guiConfig)
+	fmt.Println(guiConfig.GenTestedConfig())
 	/*
 		if gfwList, err = ParseGFWList(guiConfig.GetServerArray()); err != nil {
 			panic(err)

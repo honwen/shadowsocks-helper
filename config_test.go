@@ -22,7 +22,7 @@ func TestConfigJson(t *testing.T) {
 		if server.Password != fmt.Sprintf("PPAASS%02d", i+1) {
 			t.Error("wrong Password of Server", i+1)
 		}
-		if server.ServerPort != fmt.Sprintf("%d", i+50001) {
+		if string(server.ServerPort) != fmt.Sprintf("%d", i+50001) {
 			t.Error("wrong ServerPort of Server", i+1)
 		}
 		if server.Method != "rc4-md5" {

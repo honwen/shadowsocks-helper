@@ -4,30 +4,84 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"sort"
 	"sync"
+	"time"
 )
 
+var (
+	TestCases = []Pair{
+		Pair{"http://dl.google.com/pinyin/v2/GooglePinyinInstaller.exe", 60 * time.Second}, /*size: 15.7M, AtLeast 261KB/s*/
+		Pair{"http://dl.google.com/dl/picasa/gpautobackup_setup.exe", 20 * time.Second},    /*size: 2.5M,  AtLeast 125KB/s*/
+		Pair{"http://www.google.com/robots.txt", 3 * time.Second},                          /*size: 6.3K,  AtLeast 2.1KB/s*/
+	}
+	TestCaseIdx = 2
+)
+
+type Pair struct {
+	a, b interface{}
+}
+
 type SSConfig struct {
-	Server     string `json:"server"`
-	ServerPort string `json:"server_port"`
-	// LocalPort  string `json:"local_port"`
+	Server     string      `json:"server"`
+	ServerPort json.Number `json:"server_port"`
+	// LocalPort  json.Number `json:"local_port"`
 	Password string `json:"password"`
 	Method   string `json:"method"` // encryption method
-	TestOK   bool
+	Speed    float64
+}
+
+func (ss SSConfig) String() string {
+	return fmt.Sprintf("ss://%s:%s@%s:%s", ss.Method, ss.Password, ss.Server, string(ss.ServerPort))
+}
+
+type SSConfigSlice []SSConfig
+
+func (s SSConfigSlice) Len() int {
+	return len(s)
+}
+func (s SSConfigSlice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+func (s SSConfigSlice) Less(i, j int) bool {
+	return s[i].Speed < s[j].Speed
 }
 
 type Config struct {
-	Servers []SSConfig `json:"configs"`
+	Servers      SSConfigSlice `json:"configs"`
+	LastTestTime time.Time
 }
 
 func (config *Config) GetServerArray() (Servers []string) {
 	// ss://Method:Password@Server:ServerPort
 	for _, ss := range config.Servers {
-		Servers = append(Servers, fmt.Sprintf("TestOK: %t\t| ss://%s:%s@%s:%s",
-			ss.TestOK, ss.Method, ss.Password, ss.Server, ss.ServerPort))
+		Servers = append(Servers, fmt.Sprintf("ss://%s:%s@%s:%s",
+			ss.Method, ss.Password, ss.Server, string(ss.ServerPort)))
 	}
 	return
+}
+
+func (config *Config) GenTestedConfig() (tested Config) {
+	if config.LastTestTime == time.Unix(0, 0) {
+		config.TestServers()
+	}
+	tested = *config
+	for idx, ss := range tested.Servers {
+		if ss.Speed > 0 {
+			continue
+		}
+		tested.Servers = tested.Servers[:idx] // Cut 1st Bad
+		return
+	}
+	return
+}
+
+func (config *Config) GetBestServerArray() (Servers []string) {
+	// ss://Method:Password@Server:ServerPort
+	tested := config.GenTestedConfig()
+	return tested.GetServerArray()
 }
 
 func (config *Config) TestServers() {
@@ -35,13 +89,34 @@ func (config *Config) TestServers() {
 	for idx := range config.Servers {
 		wg.Add(1)
 		go func(idx int) {
-			if _, err := wGetByShadowsocksProxy("http://google.com", config.Servers[idx].String()); err == nil {
-				config.Servers[idx].TestOK = true
+			log.Println(fmt.Sprintf("%02d", idx), "Test begin:", config.Servers[idx].String())
+			tsBegin := float64(time.Now().UnixNano()) / 1000 // timestaps of Microsecond
+			if bytes, err := wGetRawFastByShadowsocksProxy(
+				TestCases[TestCaseIdx].a.(string),
+				config.Servers[idx].String(),
+				TestCases[TestCaseIdx].b.(time.Duration),
+			); err == nil {
+				tsDone := float64(time.Now().UnixNano()) / 1000                      // timestaps of Microsecond
+				config.Servers[idx].Speed = float64(len(bytes)) / (tsDone - tsBegin) // Bytes / Microsecond => MB/s
+				log.Println(fmt.Sprintf("%02d", idx), "Test done:", float64(len(bytes))/1000, "Kbytes in", (tsDone-tsBegin)/1000000, "seconds")
+			} else {
+				config.Servers[idx].Speed = -1
+				log.Println(fmt.Sprintf("%02d", idx), "Test done:", "Fail of", err)
 			}
 			wg.Done()
 		}(idx)
+		if idx > 0 && idx%4 == 0 {
+			time.Sleep(4 * time.Second)
+			// Avoid to much connection in the same time
+		} else {
+			time.Sleep(444 * time.Millisecond)
+		}
 	}
 	wg.Wait()
+	if !sort.IsSorted(sort.Reverse(config.Servers)) {
+		sort.Sort(sort.Reverse(config.Servers))
+	}
+	config.LastTestTime = time.Now()
 }
 
 func ParseConfig(path string) (config *Config, err error) {
@@ -56,7 +131,9 @@ func ParseConfig(path string) (config *Config, err error) {
 		return
 	}
 
-	config = &Config{}
+	config = &Config{
+		LastTestTime: time.Unix(0, 0),
+	}
 	if err = json.Unmarshal(data, config); err != nil {
 		return nil, err
 	}
@@ -64,12 +141,9 @@ func ParseConfig(path string) (config *Config, err error) {
 }
 
 func (config Config) String() (str string) {
-	for _, s := range config.GetServerArray() {
-		str += s + "\n"
+	for _, ss := range config.Servers {
+		str += fmt.Sprintf("Speed:%6.03fMB/s, ss://%s:%s@%s:%s\n",
+			ss.Speed, ss.Method, ss.Password, ss.Server, string(ss.ServerPort))
 	}
 	return
-}
-
-func (ss SSConfig) String() string {
-	return fmt.Sprintf("ss://%s:%s@%s:%s", ss.Method, ss.Password, ss.Server, ss.ServerPort)
 }

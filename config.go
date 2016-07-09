@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
+	"net/url"
 	"os"
 	"sort"
 	"sync"
@@ -17,7 +19,8 @@ var (
 		Pair{"http://dl.google.com/dl/picasa/gpautobackup_setup.exe", 20 * time.Second},    /*size: 2.5M,  AtLeast 125KB/s*/
 		Pair{"http://www.google.com/robots.txt", 3 * time.Second},                          /*size: 6.3K,  AtLeast 2.1KB/s*/
 	}
-	TestCaseIdx = 2
+	TestCaseIdx = 1
+	NoLastTest  = time.Unix(0, 0)
 )
 
 type Pair struct {
@@ -64,7 +67,7 @@ func (config *Config) GetServerArray() (Servers []string) {
 }
 
 func (config *Config) GenTestedConfig() (tested Config) {
-	if config.LastTestTime == time.Unix(0, 0) {
+	if config.LastTestTime.Equal(NoLastTest) {
 		config.TestServers()
 	}
 	tested = *config
@@ -132,7 +135,7 @@ func ParseConfig(path string) (config *Config, err error) {
 	}
 
 	config = &Config{
-		LastTestTime: time.Unix(0, 0),
+		LastTestTime: NoLastTest,
 	}
 	if err = json.Unmarshal(data, config); err != nil {
 		return nil, err
@@ -146,4 +149,31 @@ func (config Config) String() (str string) {
 			ss.Speed, ss.Method, ss.Password, ss.Server, string(ss.ServerPort))
 	}
 	return
+}
+
+func ss2json(s string) (string, error) {
+	u, err := url.Parse(s)
+	if err != nil || u.User == nil {
+		return ``, err
+	}
+	host, port, err := net.SplitHostPort(u.Host)
+	if err != nil {
+		return ``, err
+	}
+	ssJSON := struct {
+		Server     string      `json:"server"`
+		ServerPort json.Number `json:"server_port"`
+		Password   string      `json:"password"`
+		Method     string      `json:"method"`
+	}{
+		Server:     host,
+		ServerPort: json.Number(port),
+		Method:     u.User.Username(),
+	}
+	ssJSON.Password, _ = u.User.Password()
+	b, err := json.MarshalIndent(ssJSON, "", "  ")
+	if err != nil {
+		return ``, err
+	}
+	return string(b), nil
 }

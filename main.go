@@ -70,8 +70,9 @@ func main() {
 				return
 			}
 			if r.Form["server"] != nil {
-				log.Println("Listen " + addr + "/dnsmasq -- > server")
-				io.WriteString(w, gfwList.GenDnsmasqServer(r.Form["server"][0]))
+				dnsmasqFormat := strings.Replace(r.Form["server"][0], ":", "#", -1)
+				log.Println("Listen "+addr+"/dnsmasq -- > server", dnsmasqFormat)
+				io.WriteString(w, gfwList.GenDnsmasqServer(dnsmasqFormat))
 			}
 			if r.Form["ipset"] != nil {
 				log.Println("Listen " + addr + "/dnsmasq -- > ipset")

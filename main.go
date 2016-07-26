@@ -102,6 +102,10 @@ func main() {
 						log.Println("Listen "+addr+"/ssrank", "reject renew")
 						io.WriteString(w, fmt.Sprint("#", guiCfg.LastTestTime, ", REJECT", "\n"))
 					}
+				case "/ssrank?all":
+					log.Println("Listen "+addr+"/ssrank", "list all")
+					io.WriteString(w, fmt.Sprint("#", guiCfg.LastTestTime, ", REJECT", "\n"))
+					io.WriteString(w, guiCfg.String())
 				}
 			} else {
 				log.Println("Listen " + addr + "/ssrank")

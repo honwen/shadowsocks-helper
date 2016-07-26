@@ -15,9 +15,11 @@ import (
 
 var (
 	TestCases = []Pair{
-		Pair{"http://dl.google.com/pinyin/v2/GooglePinyinInstaller.exe", 60 * time.Second}, /*size: 15.7M, AtLeast 261KB/s*/
-		Pair{"http://dl.google.com/dl/picasa/gpautobackup_setup.exe", 20 * time.Second},    /*size: 2.5M,  AtLeast 125KB/s*/
-		Pair{"http://www.google.com/robots.txt", 3 * time.Second},                          /*size: 6.3K,  AtLeast 2.1KB/s*/
+		Pair{nil, nil},
+		Pair{"http://go.microsoft.com/fwlink/?LinkId=691209", 60 * time.Second},                                      /*size: 17.6M,  AtLeast 293.3KBps*/
+		Pair{"http://www.google.com/webmasters/docs/search-engine-optimization-starter-guide.pdf", 25 * time.Second}, /*size: 4.22M,  AtLeast 170KBps*/
+		Pair{"https://enterprise.github.com/downloads/en/markdown-cheatsheet.pdf", 15 * time.Second},                 /*size: 1.06M,  AtLeast 70.67KBps*/
+		Pair{"http://www.google.com/robots.txt", 3 * time.Second},                                                    /*size: 6.35K,  AtLeast 2.1KBps*/
 	}
 	TestCaseIdx = 1
 	NoLastTest  = time.Unix(0, 0)

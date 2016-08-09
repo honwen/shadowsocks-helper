@@ -104,7 +104,7 @@ func main() {
 					}
 				case "/ssrank?all":
 					log.Println("Listen "+addr+"/ssrank", "list all")
-					io.WriteString(w, fmt.Sprint("#", guiCfg.LastTestTime, ", REJECT", "\n"))
+					io.WriteString(w, fmt.Sprint("#", guiCfg.LastTestTime, "\n"))
 					io.WriteString(w, guiCfg.String())
 				}
 			} else {

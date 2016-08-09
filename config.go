@@ -94,7 +94,7 @@ func (config *Config) TestServers() {
 	for idx := range config.Servers {
 		wg.Add(1)
 		go func(idx int) {
-			log.Println(fmt.Sprintf("%02d", idx), "Test begin:", config.Servers[idx].String())
+			log.Println(fmt.Sprintf("ID:%02d", idx), "Test begin:", config.Servers[idx].String())
 			tsBegin := float64(time.Now().UnixNano()) / 1000 // timestaps of Microsecond
 			if bytes, err := wGetRawFastByShadowsocksProxy(
 				TestCases[TestCaseIdx].a.(string),
@@ -103,10 +103,10 @@ func (config *Config) TestServers() {
 			); err == nil {
 				tsDone := float64(time.Now().UnixNano()) / 1000                      // timestaps of Microsecond
 				config.Servers[idx].Speed = float64(len(bytes)) / (tsDone - tsBegin) // Bytes / Microsecond => MB/s
-				log.Println(fmt.Sprintf("%02d", idx), "Test done:", float64(len(bytes))/1000, "Kbytes in", (tsDone-tsBegin)/1000000, "seconds")
+				log.Println(fmt.Sprintf("ID:%02d", idx), "Test done:", float64(len(bytes))/1000, "Kbytes in", (tsDone-tsBegin)/1000000, "seconds")
 			} else {
 				config.Servers[idx].Speed = -1
-				log.Println(fmt.Sprintf("%02d", idx), "Test done:", "Fail of", err)
+				log.Println(fmt.Sprintf("ID:%02d", idx), "Test done:", "Fail of", err)
 			}
 			wg.Done()
 		}(idx)

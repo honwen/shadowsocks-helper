@@ -1,10 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"encoding/gob"
 	"errors"
+	"net"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 )
 
 func getCurrDir() string {
@@ -30,6 +34,27 @@ func getFileList(path string, checkFunc func(string) bool) (files []string) {
 
 func isGuiConfig(s string) bool {
 	return regexp.MustCompile(`gui-config.*\.json$`).MatchString(s)
+}
+
+func isSSRList(s string) bool {
+	return regexp.MustCompile(`ssr-list.*\.txt$`).MatchString(s)
+}
+
+func deepCopy(dst, src interface{}) error {
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(src); err != nil {
+		return err
+	}
+	return gob.NewDecoder(bytes.NewBuffer(buf.Bytes())).Decode(dst)
+}
+
+func isPortAvailable(port int) bool {
+	if port < 1 || port > 65535 {
+		return false
+	}
+	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
+	ln.Close()
+	return err == nil
 }
 
 func wGetWithSSFailsafe(urlAddr string, ssProxy []string) (text string, err error) {

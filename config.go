@@ -2,13 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/url"
 	"os"
+	"regexp"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -19,41 +22,49 @@ var (
 		Pair{"http://dl.google.com/dl/picasa/gpautobackup_setup.exe", 20 * time.Second},    /*size: 2.5M,  AtLeast 125KB/s*/
 		Pair{"http://www.google.com/robots.txt", 3 * time.Second},                          /*size: 6.3K,  AtLeast 2.1KB/s*/
 	}
-	TestCaseIdx = 1
+	TestCaseIdx = 0
 	NoLastTest  = time.Unix(0, 0)
+
+	isSSRForm = regexp.MustCompile(`ssr:\/\/([a-zA-Z0-9\.\-_]+:)(\d+:)([a-zA-Z0-9\.\-_]+:)+[a-zA-Z0-9]+`)
 )
 
 type Pair struct {
 	a, b interface{}
 }
 
-type SSConfig struct {
+type SSRConfig struct {
 	Server     string      `json:"server"`
 	ServerPort json.Number `json:"server_port"`
-	// LocalPort  json.Number `json:"local_port"`
-	Password string `json:"password"`
-	Method   string `json:"method"` // encryption method
-	Speed    float64
+	Password   string      `json:"password"`
+	Method     string      `json:"method"`
+	Protocol   string      `json:"protocol"`
+	Obfs       string      `json:"obfs"`
+	Speed      float64     `json:"-"`
 }
 
-func (ss SSConfig) String() string {
-	return fmt.Sprintf("ss://%s:%s@%s:%s", ss.Method, ss.Password, ss.Server, string(ss.ServerPort))
+func (ssr SSRConfig) String() string {
+	return fmt.Sprintf("ssr://%s:%s:%s:%s:%s:%s",
+		ssr.Server, string(ssr.ServerPort), ssr.Protocol, ssr.Method, ssr.Obfs, ssr.Password)
 }
 
-type SSConfigSlice []SSConfig
+func (ssr SSRConfig) ssString() string {
+	return fmt.Sprintf("ss://%s:%s@%s:%s", ssr.Method, ssr.Password, ssr.Server, string(ssr.ServerPort))
+}
 
-func (s SSConfigSlice) Len() int {
+type SSRConfigSlice []SSRConfig
+
+func (s SSRConfigSlice) Len() int {
 	return len(s)
 }
-func (s SSConfigSlice) Swap(i, j int) {
+func (s SSRConfigSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
-func (s SSConfigSlice) Less(i, j int) bool {
+func (s SSRConfigSlice) Less(i, j int) bool {
 	return s[i].Speed < s[j].Speed
 }
 
 type Config struct {
-	Servers      SSConfigSlice `json:"configs"`
+	Servers      SSRConfigSlice
 	LastTestTime time.Time
 }
 
@@ -68,9 +79,12 @@ func (config *Config) GetServerArray() (Servers []string) {
 
 func (config *Config) GenTestedConfig() (tested Config) {
 	if config.LastTestTime.Equal(NoLastTest) {
-		config.TestServers()
+		config.TestServersBySS()
 	}
-	tested = *config
+
+	tested.Servers = make(SSRConfigSlice, len(config.Servers))
+	copy(tested.Servers, config.Servers)
+
 	for idx, ss := range tested.Servers {
 		if ss.Speed > 0 {
 			continue
@@ -87,16 +101,16 @@ func (config *Config) GetBestServerArray() (Servers []string) {
 	return tested.GetServerArray()
 }
 
-func (config *Config) TestServers() {
+func (config *Config) TestServersBySS() {
 	var wg sync.WaitGroup
 	for idx := range config.Servers {
 		wg.Add(1)
 		go func(idx int) {
-			log.Println(fmt.Sprintf("%02d", idx), "Test begin:", config.Servers[idx].String())
+			log.Println(fmt.Sprintf("%02d", idx), "Test begin:", config.Servers[idx].ssString())
 			tsBegin := float64(time.Now().UnixNano()) / 1000 // timestaps of Microsecond
 			if bytes, err := wGetRawFastByShadowsocksProxy(
 				TestCases[TestCaseIdx].a.(string),
-				config.Servers[idx].String(),
+				config.Servers[idx].ssString(),
 				TestCases[TestCaseIdx].b.(time.Duration),
 			); err == nil {
 				tsDone := float64(time.Now().UnixNano()) / 1000                      // timestaps of Microsecond
@@ -108,11 +122,47 @@ func (config *Config) TestServers() {
 			}
 			wg.Done()
 		}(idx)
-		if idx > 0 && idx%4 == 0 {
-			time.Sleep(4 * time.Second)
-			// Avoid to much connection in the same time
+		if idx > 0 && idx%3 == 0 {
+			time.Sleep(10 * time.Second)
+			// Avoid too much connection in the same time
 		} else {
-			time.Sleep(444 * time.Millisecond)
+			time.Sleep(888 * time.Millisecond)
+		}
+	}
+	wg.Wait()
+	if !sort.IsSorted(sort.Reverse(config.Servers)) {
+		sort.Sort(sort.Reverse(config.Servers))
+	}
+	config.LastTestTime = time.Now()
+}
+
+func (config *Config) TestServersBySSR() {
+	var wg sync.WaitGroup
+	for idx := range config.Servers {
+		wg.Add(1)
+		go func(idx int) {
+			log.Println(fmt.Sprintf("%02d", idx), "Test begin:", config.Servers[idx].String())
+			tsBegin := float64(time.Now().UnixNano()) / 1000 // timestaps of Microsecond
+			if bytes, err := wGetRawFastByShadowsocksRProxy(
+				SSRPATH,
+				TestCases[TestCaseIdx].a.(string),
+				config.Servers[idx].String(),
+				TestCases[TestCaseIdx].b.(time.Duration),
+			); err == nil {
+				tsDone := float64(time.Now().UnixNano()) / 1000                                    // timestaps of Microsecond
+				config.Servers[idx].Speed = float64(len(bytes)) / (tsDone - tsBegin - 3*1000*1000) // Bytes / Microsecond => MB/s
+				log.Println(fmt.Sprintf("%02d", idx), "Test done:", float64(len(bytes))/1000, "Kbytes in", (tsDone-tsBegin)/1000000, "seconds")
+			} else {
+				config.Servers[idx].Speed = -1
+				log.Println(fmt.Sprintf("%02d", idx), "Test done:", "Fail of", err)
+			}
+			wg.Done()
+		}(idx)
+		if idx > 0 && idx%3 == 0 {
+			time.Sleep(10 * time.Second)
+			// Avoid too much connection in the same time
+		} else {
+			time.Sleep(888 * time.Millisecond)
 		}
 	}
 	wg.Wait()
@@ -129,21 +179,52 @@ func ParseConfig(path string) (config *Config, err error) {
 	}
 	defer file.Close()
 
+	config = &Config{
+		Servers:      make(SSRConfigSlice, 0),
+		LastTestTime: NoLastTest,
+	}
+
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		return
 	}
 
-	config = &Config{
-		LastTestTime: NoLastTest,
+	ssr := isSSRForm.FindAllString(string(data), -1)
+
+	for _, s := range ssr {
+		// fmt.Println(s)
+		if strings.Count(s, `:`) >= 5 {
+			s = strings.TrimPrefix(s, `ssr://`)
+			s = strings.TrimSuffix(s, "\n")
+			s = strings.TrimSuffix(s, "\r")
+			sub := strings.Split(s, ":")
+			config.Servers = append(config.Servers, SSRConfig{
+				Server:     sub[0],
+				ServerPort: json.Number(sub[1]),
+				Protocol:   sub[2],
+				Method:     sub[3],
+				Obfs:       sub[4],
+				Password:   sub[5],
+			})
+		} else {
+			// TODO add full base64 SSR-QRcode-Scheme Support
+		}
+
 	}
-	if err = json.Unmarshal(data, config); err != nil {
-		return nil, err
-	}
+
+	// fmt.Println(config.Servers)
 	return
 }
 
 func (config Config) String() (str string) {
+	for _, ssr := range config.Servers {
+		str += fmt.Sprintf("Speed:%6.03fMB/s, ssr://%s:%s:%s:%s:%s:%s\n",
+			ssr.Speed, ssr.Server, string(ssr.ServerPort), ssr.Protocol, ssr.Method, ssr.Obfs, ssr.Password)
+	}
+	return
+}
+
+func (config Config) ssString() (str string) {
 	for _, ss := range config.Servers {
 		str += fmt.Sprintf("Speed:%6.03fMB/s, ss://%s:%s@%s:%s\n",
 			ss.Speed, ss.Method, ss.Password, ss.Server, string(ss.ServerPort))
@@ -172,6 +253,27 @@ func ss2json(s string) (string, error) {
 	}
 	ssJSON.Password, _ = u.User.Password()
 	b, err := json.MarshalIndent(ssJSON, "", "  ")
+	if err != nil {
+		return ``, err
+	}
+	return string(b), nil
+}
+
+func ssr2json(s string) (string, error) {
+	if !isSSRForm.MatchString(s) {
+		return ``, errors.New("Not SSR Form")
+	}
+	s = strings.TrimPrefix(s, `ssr://`)
+	sub := strings.Split(s, ":")
+	ssrJSON := SSRConfig{
+		Server:     sub[0],
+		ServerPort: json.Number(sub[1]),
+		Protocol:   sub[2],
+		Method:     sub[3],
+		Obfs:       sub[4],
+		Password:   sub[5],
+	}
+	b, err := json.MarshalIndent(ssrJSON, "", "  ")
 	if err != nil {
 		return ``, err
 	}

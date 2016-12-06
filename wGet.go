@@ -1,12 +1,19 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
+	"os/exec"
+	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/net/proxy"
 
 	"github.com/shadowsocks/shadowsocks-go/shadowsocks"
 )
@@ -51,6 +58,37 @@ func wGetByHTTPProxy(urlAddr, proxyAddr string) (string, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 	return string(body), err
+}
+
+// GetByProxy return text of url visited though proxy
+func wGetRawFastBySOCKS5Proxy(urlAddr, proxyAddr string, timeout time.Duration) ([]byte, error) {
+	request, _ := http.NewRequest("GET", urlAddr, nil)
+	proxy, err := proxy.SOCKS5("tcp", proxyAddr,
+		&proxy.Auth{User: "username", Password: "password"},
+		&net.Dialer{
+			Timeout:   timeout,
+			KeepAlive: timeout,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	client := &http.Client{
+		Transport: &http.Transport{
+			Proxy: nil,
+			Dial:  proxy.Dial,
+			ResponseHeaderTimeout: 3 * time.Second,
+			DisableKeepAlives:     true,
+		},
+		Timeout: timeout,
+	}
+	resp, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	return body, err
 }
 
 // GetByShadowsocksProxy return text of URI through Shadowsocks Proxy
@@ -169,4 +207,36 @@ func wGetRawFastByShadowsocksProxy(uriAddr, ssProxyAddr string, timeout time.Dur
 		return nil, err
 	}
 	return body, nil
+}
+
+// GetByShadowsocksRProxy return Raw Bytes of URI through ShadowsocksR Proxy
+func wGetRawFastByShadowsocksRProxy(ssrPath, uriAddr, ssrProxyAddr string, timeout time.Duration) (b []byte, err error) {
+	randPort := -1
+	for !isPortAvailable(randPort) {
+		randPort = 10000 + rand.Int()%3*10000 + rand.Int()%33 + 333
+	}
+	ssrProxyAddr = strings.TrimPrefix(ssrProxyAddr, `ssr://`)
+	sub := strings.Split(ssrProxyAddr, ":")
+	ssr := SSRConfig{
+		Server:     sub[0],
+		ServerPort: json.Number(sub[1]),
+		Protocol:   sub[2],
+		Method:     sub[3],
+		Obfs:       sub[4],
+		Password:   sub[5],
+	}
+
+	cmd := exec.Command(ssrPath, "-s", ssr.Server, "-p", string(ssr.ServerPort),
+		"-m", ssr.Method, "-k", ssr.Password,
+		"-O", ssr.Protocol, "-o", ssr.Obfs,
+		"-b", "127.0.0.1", "-l", strconv.Itoa(randPort),
+	)
+	// fmt.Println(cmd.Args)
+	if err = cmd.Start(); err != nil {
+		return nil, err
+	}
+	time.Sleep(3 * time.Second) // Wait For SSR ready
+	b, err = wGetRawFastBySOCKS5Proxy(uriAddr, fmt.Sprintf("127.0.0.1:%d", randPort), timeout)
+	cmd.Process.Kill()
+	return
 }

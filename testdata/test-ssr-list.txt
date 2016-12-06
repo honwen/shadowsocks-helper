@@ -1,0 +1,6 @@
+// ssr://host:port:protocol:method:obfs:pass
+// ssrb64://base64(host:port:protocol:method:obfs:base64(pass))
+
+ssr://ss01.test.com:50001:auth_sha1_v1:rc4-md5:http_simple:PPAASS01
+ssr://ss02.test.com:50002:auth_sha1_v2:rc4-md5:http_simple:PPAASS02
+ssr://ss03.test.com:50003:auth_sha1_v3:rc4-md5:http_simple:PPAASS03

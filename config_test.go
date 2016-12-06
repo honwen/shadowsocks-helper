@@ -6,7 +6,7 @@ import (
 )
 
 func TestConfigJson(t *testing.T) {
-	config, err := ParseConfig("testdata/test-gui-config.json")
+	config, err := ParseConfig("testdata/test-ssr-list.txt")
 	if err != nil {
 		t.Fatal("error parsing config.json:", err)
 	}
@@ -22,11 +22,17 @@ func TestConfigJson(t *testing.T) {
 		if server.Password != fmt.Sprintf("PPAASS%02d", i+1) {
 			t.Error("wrong Password of Server", i+1)
 		}
+		if server.Protocol != fmt.Sprintf("auth_sha1_v%d", i+1) {
+			t.Error("wrong Protocol of Server", i+1)
+		}
 		if string(server.ServerPort) != fmt.Sprintf("%d", i+50001) {
 			t.Error("wrong ServerPort of Server", i+1)
 		}
 		if server.Method != "rc4-md5" {
 			t.Error("wrong Method of Server", i+1)
+		}
+		if server.Obfs != "http_simple" {
+			t.Error("wrong Obfs of Server", i+1)
 		}
 	}
 }

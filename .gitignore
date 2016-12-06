@@ -29,3 +29,5 @@ debug
 shadowsocks-helper*
 
 gui-config*.json
+
+ssr-list*.txt

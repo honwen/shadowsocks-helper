@@ -1,23 +1,15 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"os"
 	"time"
 
+	"log"
+
+	"github.com/chenhw2/shadowsocks-helper/ssStruct"
 	"github.com/urfave/cli"
-)
-
-var (
-	onlySSR bool
-	SSRPATH string
-
-	guiCfgSSR *Config
-	guiCfgSS  Config
-	gfwList   *GFWList
 )
 
 func init() {
@@ -26,9 +18,9 @@ func init() {
 	app.Usage = "shadowsocks(R)-helper"
 	app.Commands = []cli.Command{
 		{
-			Name:     "gui2ssr",
-			Category: "Converter",
-			Usage:    "convert FROM[gui-config.json] to FROM[ssr://host:port:protocol:method:obfs:pass]",
+			Name:     "json2ssr",
+			Category: "CONVERTER",
+			Usage:    "convert FROM[gui-config.json] to URI[ssr://host:port:protocol:method:obfs:pass]",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "input, i",
@@ -38,23 +30,52 @@ func init() {
 				cli.StringFlag{
 					Name:  "protocol, O",
 					Value: "origin",
-					Usage: "protocol `PLUGIN`: [origin,verify_sha1,auth_sha1_v2,auth_sha1_v4,auth_aes128_md5,auth_aes128_sha1]",
+					Usage: "protocol `PLUGIN`: [origin, verify_sha1, auth_sha1_v2, auth_sha1_v4, auth_aes128_md5, auth_aes128_sha1]",
 				},
 				cli.StringFlag{
 					Name:  "obfs, o",
 					Value: "plain",
-					Usage: "obfs `PLUGIN`: [plain,http_simple,http_post,tls1.2_ticket_auth]",
+					Usage: "obfs `PLUGIN`: [plain, http_simple, http_post, tls1.2_ticket_auth]",
 				},
 			},
 			Action: func(c *cli.Context) error {
-				fmt.Println("gui2ssr task: ", c.String("input"), c.String("protocol"), c.String("obfs"))
+				// fmt.Println("gui2ssr task: ", c.String("input"), c.String("protocol"), c.String("obfs"))
+				ssrs, err := ParseSSRFromJSON(c.String("input"), c.String("protocol"), c.String("obfs"))
+				if err != nil {
+					log.Printf("%+v", err)
+				}
+				for _, ssr := range ssrs.GenSSRURIList() {
+					fmt.Println(ssr)
+				}
+				return nil
+			},
+		},
+		{
+			Name:     "json2ss",
+			Category: "CONVERTER",
+			Usage:    "convert FROM[gui-config.json] to URI[ss://method:pass@host:port]",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "input, i",
+					Value: "gui-config.json",
+					Usage: "specify `PATH` of gui-config.json",
+				}},
+			Action: func(c *cli.Context) error {
+				// fmt.Println("gui2ss task: ", c.String("input"))
+				sss, err := ParseSSFromJSON(c.String("input"))
+				if err != nil {
+					log.Printf("%+v", err)
+				}
+				for _, ss := range sss.GenSSURIList() {
+					fmt.Println(ss)
+				}
 				return nil
 			},
 		},
 		{
 			Name:     "ss2ssr",
-			Category: "Converter",
-			Usage:    "convert FROM[ss://method[-auth]:pass@host:port] to FROM[ssr://host:port:protocol:method:obfs:pass]",
+			Category: "CONVERTER",
+			Usage:    "convert URI[ss://method:pass@host:port] to URI[ssr://host:port:protocol:method:obfs:pass]",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "ss, s",
@@ -64,38 +85,73 @@ func init() {
 				cli.StringFlag{
 					Name:  "protocol, O",
 					Value: "origin",
-					Usage: "protocol `PLUGIN`: [origin,verify_sha1,auth_sha1_v2,auth_sha1_v4,auth_aes128_md5,auth_aes128_sha1]",
+					Usage: "protocol `PLUGIN`: [origin, verify_sha1, auth_sha1_v2, auth_sha1_v4, auth_aes128_md5, auth_aes128_sha1]",
 				},
 				cli.StringFlag{
 					Name:  "obfs, o",
 					Value: "plain",
-					Usage: "obfs `PLUGIN`: [plain,http_simple,http_post,tls1.2_ticket_auth]",
+					Usage: "obfs `PLUGIN`: [plain, http_simple, http_post, tls1.2_ticket_auth]",
 				},
 			},
 			Action: func(c *cli.Context) error {
-				fmt.Println("ss2ssr task: ", c.String("ss"), c.String("protocol"), c.String("obfs"))
+				// fmt.Println("ss2ssr task: ", c.String("ss"), c.String("protocol"), c.String("obfs"))
+				ss, err := ssStruct.ParseSSFromURI(c.String("ss"))
+				if err != nil {
+					log.Printf("%+v", err)
+				} else {
+					fmt.Println(ss.ToSSR(c.String("protocol"), c.String("obfs")))
+				}
 				return nil
 			},
 		},
 		{
-			Name:     "list-ss",
-			Category: "Converter",
-			Usage:    "list shadowsocks from FROM[gui-config.json]",
+			Name:     "ss2json",
+			Category: "CONVERTER",
+			Usage:    "convert URI[ss://method:pass@host:port] to JSON",
 			Flags: []cli.Flag{
 				cli.StringFlag{
-					Name:  "input, i",
-					Value: "gui-config.json",
-					Usage: "specify `PATH` of gui-config.json",
-				}},
+					Name:  "ss, s",
+					Value: "ss://bf-cfb:test@192.168.100.1:8888",
+					Usage: "shadowsocks `URI`",
+				},
+			},
 			Action: func(c *cli.Context) error {
-				fmt.Println("list-ss task: ", c.String("input"))
+				// fmt.Println("ss2json task: ", c.String("ss"), c.String("protocol"), c.String("obfs"))
+				ss, err := ssStruct.ParseSSFromURI(c.String("ss"))
+				if err != nil {
+					log.Printf("%+v", err)
+				} else {
+					fmt.Println(ss.JSON())
+				}
+				return nil
+			},
+		},
+		{
+			Name:     "ssr2json",
+			Category: "CONVERTER",
+			Usage:    "convert URI[ssr://host:port:protocol:method:obfs:pass] to JSON",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "ssr, s",
+					Value: "ssr://host:port:protocol:method:obfs:pass",
+					Usage: "shadowsocksR `URI`",
+				},
+			},
+			Action: func(c *cli.Context) error {
+				// fmt.Println("ssr2json task: ", c.String("ssr"), c.String("protocol"), c.String("obfs"))
+				ssr, err := ssStruct.ParseSSRFromURI(c.String("ss"))
+				if err != nil {
+					log.Printf("%+v", err)
+				} else {
+					fmt.Println(ssr.JSON())
+				}
 				return nil
 			},
 		},
 		{
 			Name:     "dnsmasq",
-			Category: "Converter",
-			Usage:    "list shadowsocks from FROM[gui-config.json]",
+			Category: "HELPER",
+			Usage:    "Gen DNSMASQ(server/ipset) from GFWLIST(online) with SSR-Proxy(optional)",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "server, s",
@@ -118,7 +174,7 @@ func init() {
 		},
 		{
 			Name:     "ssrrank",
-			Category: "Rank",
+			Category: "HELPER",
 			Usage:    "speed-test for shadowsocksr from list of FROM[ssr://host:port:protocol:method:obfs:pass]",
 			Flags: []cli.Flag{
 				cli.StringFlag{
@@ -147,15 +203,6 @@ func init() {
 			Usage: "Skip RANK",
 		},
 	}
-	app.Action = func(c *cli.Context) (err error) {
-		SSRPATH = c.String("ssr")
-		if _, err := os.Stat(SSRPATH); os.IsNotExist(err) {
-			// path/to/whatever does not exist
-			fmt.Println("SSR IsNotExist")
-		}
-		onlySSR = c.Bool("onlyssr")
-		return
-	}
 	app.Run(os.Args)
 
 	rand.Seed(int64(time.Now().Nanosecond()))
@@ -163,33 +210,10 @@ func init() {
 
 func main() {
 	var (
-		err error
+	//err error
 	//	wg  sync.WaitGroup
 	)
 
-	if files := getFileList(getCurrDir(), isSSRList); files != nil {
-		if guiCfgSSR, err = ParseConfig(files[0]); err != nil {
-			panic(err)
-		}
-	} else {
-		panic(errors.New(`NO ssr-list*.txt`))
-	}
-
-	if onlySSR {
-		log.Println("Only Enable SSR", SSRPATH)
-	} else {
-		log.Println("Enable SS")
-		guiCfgSS.Servers = make(SSRConfigSlice, len(guiCfgSSR.Servers))
-		copy(guiCfgSS.Servers, guiCfgSSR.Servers)
-	}
-
-	go guiCfgSSR.TestServersBySSR()
-	go guiCfgSS.TestServersBySS()
-	go func() {
-		if gfwList, err = ParseGFWList(guiCfgSS.GetServerArray()); err != nil {
-			panic(err)
-		}
-	}()
 	/*
 		go func() {
 			defer wg.Done()

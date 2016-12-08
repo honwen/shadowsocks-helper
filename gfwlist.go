@@ -29,8 +29,9 @@ func ParseGFWList(SSfailSafe []string) (*GFWList, error) {
 	if err != nil {
 		return nil, err
 	}
-	gfwList = &GFWList{}
-	gfwList.Domains = domains
+	gfwList := &GFWList{
+		Domains: domains,
+	}
 	return gfwList, nil
 }
 

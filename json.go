@@ -2,14 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net"
-	"net/url"
 	"os"
-	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -25,7 +21,7 @@ var (
 	TestCaseIdx = 0
 	NoLastTest  = time.Unix(0, 0)
 
-	isSSRForm = regexp.MustCompile(`ssr:\/\/([a-zA-Z0-9\.\-_]+:)(\d+:)([a-zA-Z0-9\.\-_]+:)+[a-zA-Z0-9]+`)
+	//isSSRForm = regexp.MustCompile(`ssr:\/\/([a-zA-Z0-9\.\-_]+:)(\d+:)([a-zA-Z0-9\.\-_]+:)+[a-zA-Z0-9]+`)
 )
 
 type Pair struct {
@@ -144,7 +140,7 @@ func (config *Config) TestServersBySSR() {
 			log.Println(fmt.Sprintf("%02d", idx), "Test begin:", config.Servers[idx].String())
 			tsBegin := float64(time.Now().UnixNano()) / 1000 // timestaps of Microsecond
 			if bytes, err := wGetRawFastByShadowsocksRProxy(
-				SSRPATH,
+				"",
 				TestCases[TestCaseIdx].a.(string),
 				config.Servers[idx].String(),
 				TestCases[TestCaseIdx].b.(time.Duration),
@@ -230,52 +226,4 @@ func (config Config) ssString() (str string) {
 			ss.Speed, ss.Method, ss.Password, ss.Server, string(ss.ServerPort))
 	}
 	return
-}
-
-func ss2json(s string) (string, error) {
-	u, err := url.Parse(s)
-	if err != nil || u.User == nil {
-		return ``, err
-	}
-	host, port, err := net.SplitHostPort(u.Host)
-	if err != nil {
-		return ``, err
-	}
-	ssJSON := struct {
-		Server     string      `json:"server"`
-		ServerPort json.Number `json:"server_port"`
-		Password   string      `json:"password"`
-		Method     string      `json:"method"`
-	}{
-		Server:     host,
-		ServerPort: json.Number(port),
-		Method:     u.User.Username(),
-	}
-	ssJSON.Password, _ = u.User.Password()
-	b, err := json.MarshalIndent(ssJSON, "", "  ")
-	if err != nil {
-		return ``, err
-	}
-	return string(b), nil
-}
-
-func ssr2json(s string) (string, error) {
-	if !isSSRForm.MatchString(s) {
-		return ``, errors.New("Not SSR Form")
-	}
-	s = strings.TrimPrefix(s, `ssr://`)
-	sub := strings.Split(s, ":")
-	ssrJSON := SSRConfig{
-		Server:     sub[0],
-		ServerPort: json.Number(sub[1]),
-		Protocol:   sub[2],
-		Method:     sub[3],
-		Obfs:       sub[4],
-		Password:   sub[5],
-	}
-	b, err := json.MarshalIndent(ssrJSON, "", "  ")
-	if err != nil {
-		return ``, err
-	}
-	return string(b), nil
 }

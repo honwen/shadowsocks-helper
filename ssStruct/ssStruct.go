@@ -10,8 +10,13 @@ import (
 	"strings"
 )
 
-// RegxIsSSRURI is regexp aht check ssr URI
-var RegxIsSSRURI = regexp.MustCompile(`ssr:\/\/([a-zA-Z0-9\.\-_]+:)(\d+:)([a-zA-Z0-9\.\-_]+:)+[a-zA-Z0-9]+`)
+var (
+	// RegxIsSSURI is regexp aht check ssr URI
+	RegxIsSSURI = regexp.MustCompile(`ss:\/\/([a-zA-Z0-9\.\-_]+):([a-zA-Z0-9\.\-_]+)@([a-zA-Z0-9\.\-_]+):(\d+)`)
+
+	// RegxIsSSRURI is regexp aht check ssr URI
+	RegxIsSSRURI = regexp.MustCompile(`ssr:\/\/([a-zA-Z0-9\.\-_]+:)(\d+:)([a-zA-Z0-9\.\-_]+:)+[a-zA-Z0-9]+`)
+)
 
 // SS original
 type SS struct {
@@ -76,6 +81,9 @@ func (ss SS) ToSSR(protocol, obfs string) SSR {
 
 //ParseSSFromURI Parse SS From URI[ss://method:pass@host:port]
 func ParseSSFromURI(str string) (*SS, error) {
+	if !RegxIsSSURI.MatchString(str) {
+		return nil, errors.New("Not SS URI[ss://method:pass@host:port]")
+	}
 	u, err := url.Parse(str)
 	if err != nil || u.User == nil {
 		return nil, err
@@ -96,7 +104,7 @@ func ParseSSFromURI(str string) (*SS, error) {
 //ParseSSRFromURI Parse SSR From URI [ssr://host:port:protocol:method:obfs:pass]
 func ParseSSRFromURI(str string) (*SSR, error) {
 	if !RegxIsSSRURI.MatchString(str) {
-		return nil, errors.New("Not SSR Form[ssr://host:port:protocol:method:obfs:pass]")
+		return nil, errors.New("Not SSR URI[ssr://host:port:protocol:method:obfs:pass]")
 	}
 	sub := strings.Split(strings.TrimPrefix(str, `ssr://`), ":")
 	ssr := &SSR{

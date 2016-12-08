@@ -13,6 +13,11 @@ import (
 )
 
 func init() {
+	rand.Seed(int64(time.Now().Nanosecond()))
+
+}
+
+func main() {
 	app := cli.NewApp()
 	app.Name = "ss(r)-helper"
 	app.Usage = "shadowsocks(R)-helper"
@@ -79,7 +84,7 @@ func init() {
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "ss, s",
-					Value: "ss://bf-cfb:test@192.168.100.1:8888",
+					Value: "ss://method:pass@host:port",
 					Usage: "shadowsocks `URI`",
 				},
 				cli.StringFlag{
@@ -111,7 +116,7 @@ func init() {
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "ss, s",
-					Value: "ss://bf-cfb:test@192.168.100.1:8888",
+					Value: "ss://method:pass@host:port",
 					Usage: "shadowsocks `URI`",
 				},
 			},
@@ -205,10 +210,6 @@ func init() {
 	}
 	app.Run(os.Args)
 
-	rand.Seed(int64(time.Now().Nanosecond()))
-}
-
-func main() {
 	var (
 	//err error
 	//	wg  sync.WaitGroup

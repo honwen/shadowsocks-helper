@@ -8,12 +8,19 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/chenhw2/shadowsocks-helper/ssStruct"
 	"github.com/urfave/cli"
+)
+
+var (
+	version        = "MISSING build version [git hash]"
+	defaultSSRPath = "ssr-local"
 )
 
 func init() {
@@ -24,11 +31,16 @@ func init() {
 	signal.Notify(cleanup, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-cleanup
-		syscall.Kill(-os.Getpid(), syscall.SIGKILL)
+		psClean(os.Getpid())
 	}()
-}
 
-var version = "MISSING build version [git hash]"
+	switch runtime.GOOS {
+	case "linux":
+		defaultSSRPath = "/usr/bin/ssr-local"
+	case "windows":
+		defaultSSRPath = getCurrDir("ssr-local.exe")
+	}
+}
 
 func main() {
 	app := cli.NewApp()
@@ -188,6 +200,7 @@ func main() {
 				},
 				cli.StringFlag{
 					Name:  "path, b",
+					Value: defaultSSRPath,
 					Usage: "`PATH` of ssr-local (Need if proxy is not empty)",
 				}},
 			Action: func(c *cli.Context) error {
@@ -249,7 +262,8 @@ func main() {
 				},
 				cli.StringFlag{
 					Name:  "path, b",
-					Usage: "`PATH` of ssr-local (Need if proxy is not empty)",
+					Value: defaultSSRPath,
+					Usage: "`PATH` of ssr-local",
 				}},
 			Action: func(c *cli.Context) error {
 				// fmt.Println("ssrrank task: ", c.String("input"), c.String("mode"), c.String("justone"), c.String("path"))
@@ -322,4 +336,9 @@ func wGet(urlAddr string) (string, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 	return string(body), err
+}
+
+func getCurrDir(fn string) (path string) {
+	path, _ = filepath.Abs(filepath.Dir(os.Args[0]))
+	return filepath.Join(path, fn)
 }

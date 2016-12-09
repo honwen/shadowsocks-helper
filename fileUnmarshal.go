@@ -11,16 +11,8 @@ import (
 
 // ParseSSRFromTEXT Parse ssStruct.SliceSSR From [ssr-list.txt]
 func ParseSSRFromTEXT(path string) (ssrs ssStruct.SliceSSR, err error) {
-	var (
-		file  *os.File
-		bytes []byte
-	)
-	if file, err = os.Open(path); err != nil {
-		return
-	}
-	defer file.Close()
-
-	if bytes, err = ioutil.ReadAll(file); err != nil {
+	var bytes []byte
+	if bytes, err = readFileAll(path); err != nil {
 		return
 	}
 	ssrListStr := ssStruct.RegxIsSSRURI.FindAllString(string(bytes), -1)
@@ -50,21 +42,15 @@ func ParseSSRFromTEXT(path string) (ssrs ssStruct.SliceSSR, err error) {
 
 // ParseSSRFromJSON Parse ssStruct.SliceSSR From [gui-config.json]
 func ParseSSRFromJSON(path, protocol, obfs string) (sss ssStruct.SliceSSR, err error) {
-	file, err := os.Open(path) // For read access.
-	if err != nil {
-		return
-	}
-	defer file.Close()
-
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
+	var bytes []byte
+	if bytes, err = readFileAll(path); err != nil {
 		return
 	}
 	mGuiConfig := &struct {
 		Servers ssStruct.SliceSS `json:"configs"`
 	}{}
 
-	err = json.Unmarshal(data, mGuiConfig)
+	err = json.Unmarshal(bytes, mGuiConfig)
 	if err != nil {
 		return
 	}
@@ -79,24 +65,25 @@ func ParseSSRFromJSON(path, protocol, obfs string) (sss ssStruct.SliceSSR, err e
 
 // ParseSSFromJSON Parse ssStruct.SliceSS From [gui-config.json]
 func ParseSSFromJSON(path string) (sss ssStruct.SliceSS, err error) {
-	file, err := os.Open(path) // For read access.
-	if err != nil {
-		return
-	}
-	defer file.Close()
-
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
+	var bytes []byte
+	if bytes, err = readFileAll(path); err != nil {
 		return
 	}
 	mGuiConfig := &struct {
 		Servers ssStruct.SliceSS `json:"configs"`
 	}{}
 
-	err = json.Unmarshal(data, mGuiConfig)
+	err = json.Unmarshal(bytes, mGuiConfig)
 	sss = mGuiConfig.Servers
-	if err != nil {
-		sss = nil
+	return
+}
+
+func readFileAll(path string) (bs []byte, err error) {
+	var file *os.File
+	if file, err = os.Open(path); err != nil {
+		return
 	}
+	defer file.Close()
+	bs, err = ioutil.ReadAll(file)
 	return
 }

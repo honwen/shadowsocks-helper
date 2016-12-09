@@ -5,17 +5,43 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/net/proxy"
+)
+
+type pair struct {
+	a, b interface{}
+}
+
+var (
+	testCases = []pair{
+		pair{"http://dl.google.com/pinyin/v2/GooglePinyinInstaller.exe", 60 * time.Second}, /*size: 15.7M, AtLeast 261KB/s*/
+		pair{"http://dl.google.com/dl/picasa/gpautobackup_setup.exe", 20 * time.Second},    /*size: 2.5M,  AtLeast 125KB/s*/
+		pair{"http://www.google.com/robots.txt", 3 * time.Second},                          /*size: 6.3K,  AtLeast 2.1KB/s*/
+	}
+)
+
+// TestCase Level
+type TestCase int
+
+// TestCase Level
+const (
+	TestCaseMid   TestCase = 0
+	TestCaseSmall TestCase = 1
+	TestCaseTiny  TestCase = 2
 )
 
 // Regexp to Check URI
@@ -46,11 +72,24 @@ type FuncSSR struct {
 	Path  string
 }
 
+// SliceSS is Slice of SS
+type SliceSS []SS
+
 // SliceSSR is Slice of SSR
 type SliceSSR []SSR
 
-// SliceSS is Slice of SS
-type SliceSS []SS
+// SliceFuncSSR is Slice of FuncSSR
+type SliceFuncSSR []FuncSSR
+
+func (sfssr SliceFuncSSR) Len() int {
+	return len(sfssr)
+}
+func (sfssr SliceFuncSSR) Swap(i, j int) {
+	sfssr[i], sfssr[j] = sfssr[j], sfssr[i]
+}
+func (sfssr SliceFuncSSR) Less(i, j int) bool {
+	return sfssr[i].Speed < sfssr[j].Speed
+}
 
 // JSON gen json form of SS
 func (ss SS) JSON() string {
@@ -150,19 +189,20 @@ func (ssr FuncSSR) WGet(uriAddr string, timeout time.Duration) (bs []byte, tmdel
 	cmd := exec.Command(ssr.Path, "-s", ssr.Server, "-p", string(ssr.ServerPort), "-m", ssr.Method, "-k", ssr.Password,
 		"-O", ssr.Protocol, "-o", ssr.Obfs, "-b", "127.0.0.1", "-l", strconv.Itoa(randPort),
 	)
-	// fmt.Println(cmd.Args)
 	if err = cmd.Start(); err != nil {
 		return
 	}
 	tmBegin := time.Now()
 	err = errors.New("Just Focre to wGet")
 	for i := 0; i < 2000 /*10s*/ && err != nil; i++ {
-		// fmt.Println("SSR not ready")
 		time.Sleep(50 * time.Millisecond) // Wait For SSR ready
 		tmdelay = time.Now().Sub(tmBegin)
 		bs, err = wGetRawFastBySOCKS5Proxy(uriAddr, fmt.Sprintf("127.0.0.1:%d", randPort), timeout)
 	}
-	cmd.Process.Kill()
+
+	if err = cmd.Process.Signal(os.Kill); err != nil {
+		cmd.Process.Kill()
+	}
 	return
 }
 
@@ -202,6 +242,54 @@ func randomTCPPort(maxRetryTimes int) (randPort int) {
 		if ln, err := net.Listen("tcp", ":"+strconv.Itoa(randPort)); err == nil {
 			ln.Close()
 			break
+		}
+	}
+	return
+}
+
+// SpeedTest Test Speed of SSR Proxy
+func (ssr *FuncSSR) SpeedTest(url string, timeout time.Duration) error {
+	tmBegin := time.Now()
+	if bytes, tmdelay, err := ssr.WGet(url, timeout); err == nil {
+		tmTotal := time.Now().Sub(tmBegin) - tmdelay
+		ssr.Speed = float64(len(bytes)) / float64(tmTotal.Nanoseconds()) * 1000.0 // Bytes / * 1000 => MB/s
+	} else {
+		ssr.Speed = -1
+		return err
+	}
+	return nil
+}
+
+// SpeedTest Test Speed of SSR Proxy
+func (sfssr *SliceFuncSSR) SpeedTest(TestCaseLevel TestCase) {
+	var wg sync.WaitGroup
+	for idx := range *sfssr {
+		wg.Add(1)
+		go func(idx int) {
+			log.Println(fmt.Sprintf("#%02d", idx), "Test begin:", (*sfssr)[idx].SSR.String())
+			(*sfssr)[idx].SpeedTest(
+				testCases[TestCaseLevel].a.(string),
+				testCases[TestCaseLevel].b.(time.Duration))
+			log.Println(fmt.Sprintf("#%02d", idx), "Test done:", fmt.Sprintf("Speed:%6.03fMB/s", (*sfssr)[idx].Speed))
+			wg.Done()
+		}(idx)
+		time.Sleep(333 * time.Millisecond)
+		// fmt.Println(sfssr.countSpeedTested(), idx)
+		for sfssr.countSpeedTested()+4 < idx {
+			// fmt.Println(sfssr.countSpeedTested(), idx)
+			time.Sleep(333 * time.Millisecond)
+		}
+	}
+	wg.Wait()
+	if !sort.IsSorted(sort.Reverse(sfssr)) {
+		sort.Sort(sort.Reverse(sfssr))
+	}
+}
+
+func (sfssr SliceFuncSSR) countSpeedTested() (count int) {
+	for _, s := range sfssr {
+		if s.Speed != 0 {
+			count++
 		}
 	}
 	return

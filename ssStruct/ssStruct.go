@@ -192,12 +192,16 @@ func (ssr FuncSSR) WGet(uriAddr string, timeout time.Duration) (bs []byte, tmdel
 	if err = cmd.Start(); err != nil {
 		return
 	}
+	// time.AfterFunc(timeout+3*time.Second, func() { cmd.Process.Kill() })
 	tmBegin := time.Now()
 	err = errors.New("Just Focre to wGet")
 	for i := 0; i < 2000 /*10s*/ && err != nil; i++ {
 		time.Sleep(50 * time.Millisecond) // Wait For SSR ready
 		tmdelay = time.Now().Sub(tmBegin)
 		bs, err = wGetRawFastBySOCKS5Proxy(uriAddr, fmt.Sprintf("127.0.0.1:%d", randPort), timeout)
+		if time.Now().Sub(tmBegin) > timeout+10*time.Second {
+			break // Max Retry Time = timeout + max(socks ready delay)
+		}
 	}
 
 	if err = cmd.Process.Signal(os.Kill); err != nil {
@@ -223,6 +227,7 @@ func wGetRawFastBySOCKS5Proxy(urlAddr, proxyAddr string, timeout time.Duration) 
 			Proxy: nil,
 			Dial:  proxy.Dial,
 			ResponseHeaderTimeout: 3 * time.Second,
+			IdleConnTimeout:       timeout,
 			DisableKeepAlives:     true,
 		},
 		Timeout: timeout,
@@ -253,6 +258,9 @@ func (ssr *FuncSSR) SpeedTest(url string, timeout time.Duration) error {
 	if bytes, tmdelay, err := ssr.WGet(url, timeout); err == nil {
 		tmTotal := time.Now().Sub(tmBegin) - tmdelay
 		ssr.Speed = float64(len(bytes)) / float64(tmTotal.Nanoseconds()) * 1000.0 // Bytes / * 1000 => MB/s
+		if ssr.Speed < 0.0005 {
+			ssr.Speed = -1
+		}
 	} else {
 		ssr.Speed = -1
 		return err
@@ -275,7 +283,7 @@ func (sfssr *SliceFuncSSR) SpeedTest(TestCaseLevel TestCase) {
 		}(idx)
 		time.Sleep(333 * time.Millisecond)
 		// fmt.Println(sfssr.countSpeedTested(), idx)
-		for sfssr.countSpeedTested()+4 < idx {
+		for sfssr.countSpeedTested()+4 <= idx /*Max 5 Server at the same time*/ {
 			// fmt.Println(sfssr.countSpeedTested(), idx)
 			time.Sleep(333 * time.Millisecond)
 		}

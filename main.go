@@ -252,7 +252,7 @@ func main() {
 					Usage: "`PATH` of ssr-local (Need if proxy is not empty)",
 				}},
 			Action: func(c *cli.Context) error {
-				fmt.Println("dnsmasq task: ", c.String("input"), c.String("mode"), c.String("justone"), c.String("path"))
+				// fmt.Println("ssrrank task: ", c.String("input"), c.String("mode"), c.String("justone"), c.String("path"))
 				var ssTC ssStruct.TestCase
 				var fssr ssStruct.SliceFuncSSR
 				switch c.String("mode") {
@@ -266,12 +266,7 @@ func main() {
 					ssTC = ssStruct.TestCaseTiny
 				}
 				if len(c.String("justone")) > 0 {
-					bytes, err := readFileAll(c.String("justone"))
-					if err != nil {
-						log.Printf("%+v", err)
-						return nil
-					}
-					ssr, err := ssStruct.ParseSSRFromURI(string(bytes))
+					ssr, err := ssStruct.ParseSSRFromURI(c.String("justone"))
 					if err != nil {
 						log.Printf("%+v", err)
 						return nil
@@ -284,7 +279,6 @@ func main() {
 						},
 					}
 					fssr.SpeedTest(ssTC)
-
 				} else {
 					ssr, err := ParseSSRFromTEXT(c.String("input"))
 					if err != nil {
@@ -298,6 +292,7 @@ func main() {
 							Path: c.String("path"),
 						}
 					}
+					// fmt.Println("Total SSR Server:", fssr.Len(), "\n", fssr)
 					fssr.SpeedTest(ssTC)
 				}
 				for idx := range fssr {

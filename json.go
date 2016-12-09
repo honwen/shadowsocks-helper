@@ -1,16 +1,6 @@
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
-	"sort"
-	"strings"
-	"sync"
-	"time"
-)
+import "time"
 
 var (
 	TestCases = []Pair{
@@ -28,6 +18,7 @@ type Pair struct {
 	a, b interface{}
 }
 
+/*
 type SSRConfig struct {
 	Server     string      `json:"server"`
 	ServerPort json.Number `json:"server_port"`
@@ -132,6 +123,7 @@ func (config *Config) TestServersBySS() {
 	config.LastTestTime = time.Now()
 }
 
+
 func (config *Config) TestServersBySSR() {
 	var wg sync.WaitGroup
 	for idx := range config.Servers {
@@ -168,50 +160,6 @@ func (config *Config) TestServersBySSR() {
 	config.LastTestTime = time.Now()
 }
 
-func ParseConfig(path string) (config *Config, err error) {
-	file, err := os.Open(path) // For read access.
-	if err != nil {
-		return
-	}
-	defer file.Close()
-
-	config = &Config{
-		Servers:      make(SSRConfigSlice, 0),
-		LastTestTime: NoLastTest,
-	}
-
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		return
-	}
-
-	ssr := isSSRForm.FindAllString(string(data), -1)
-
-	for _, s := range ssr {
-		// fmt.Println(s)
-		if strings.Count(s, `:`) >= 5 {
-			s = strings.TrimPrefix(s, `ssr://`)
-			s = strings.TrimSuffix(s, "\n")
-			s = strings.TrimSuffix(s, "\r")
-			sub := strings.Split(s, ":")
-			config.Servers = append(config.Servers, SSRConfig{
-				Server:     sub[0],
-				ServerPort: json.Number(sub[1]),
-				Protocol:   sub[2],
-				Method:     sub[3],
-				Obfs:       sub[4],
-				Password:   sub[5],
-			})
-		} else {
-			// TODO add full base64 SSR-QRcode-Scheme Support
-		}
-
-	}
-
-	// fmt.Println(config.Servers)
-	return
-}
-
 func (config Config) String() (str string) {
 	for _, ssr := range config.Servers {
 		str += fmt.Sprintf("Speed:%6.03fMB/s, ssr://%s:%s:%s:%s:%s:%s\n",
@@ -227,3 +175,5 @@ func (config Config) ssString() (str string) {
 	}
 	return
 }
+
+*/

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -15,6 +14,7 @@ import (
 
 	"golang.org/x/net/proxy"
 
+	"github.com/chenhw2/shadowsocks-helper/ssStruct"
 	"github.com/shadowsocks/shadowsocks-go/shadowsocks"
 )
 
@@ -210,26 +210,13 @@ func wGetRawFastByShadowsocksProxy(uriAddr, ssProxyAddr string, timeout time.Dur
 }
 
 // GetByShadowsocksRProxy return Raw Bytes of URI through ShadowsocksR Proxy
-func wGetRawFastByShadowsocksRProxy(ssrPath, uriAddr, ssrProxyAddr string, timeout time.Duration) (b []byte, err error) {
+func wGetRawFastByShadowsocksRProxy(ssrPath, uriAddr string, ssr ssStruct.SSR, timeout time.Duration) (b []byte, err error) {
 	randPort := -1
 	for !isPortAvailable(randPort) {
 		randPort = 10000 + rand.Int()%3*10000 + rand.Int()%33 + 333
 	}
-	ssrProxyAddr = strings.TrimPrefix(ssrProxyAddr, `ssr://`)
-	sub := strings.Split(ssrProxyAddr, ":")
-	ssr := SSRConfig{
-		Server:     sub[0],
-		ServerPort: json.Number(sub[1]),
-		Protocol:   sub[2],
-		Method:     sub[3],
-		Obfs:       sub[4],
-		Password:   sub[5],
-	}
-
-	cmd := exec.Command(ssrPath, "-s", ssr.Server, "-p", string(ssr.ServerPort),
-		"-m", ssr.Method, "-k", ssr.Password,
-		"-O", ssr.Protocol, "-o", ssr.Obfs,
-		"-b", "127.0.0.1", "-l", strconv.Itoa(randPort),
+	cmd := exec.Command(ssrPath, "-s", ssr.Server, "-p", string(ssr.ServerPort), "-m", ssr.Method, "-k", ssr.Password,
+		"-O", ssr.Protocol, "-o", ssr.Obfs, "-b", "127.0.0.1", "-l", strconv.Itoa(randPort),
 	)
 	// fmt.Println(cmd.Args)
 	if err = cmd.Start(); err != nil {
@@ -237,6 +224,29 @@ func wGetRawFastByShadowsocksRProxy(ssrPath, uriAddr, ssrProxyAddr string, timeo
 	}
 	time.Sleep(3 * time.Second) // Wait For SSR ready
 	b, err = wGetRawFastBySOCKS5Proxy(uriAddr, fmt.Sprintf("127.0.0.1:%d", randPort), timeout)
+	cmd.Process.Kill()
+	return
+}
+
+// GetByShadowsocksRProxy return Raw Bytes of URI through ShadowsocksR Proxy
+func wGetByShadowsocksRProxy(ssrPath, uriAddr string, ssr ssStruct.SSR, timeout time.Duration) (b []byte, err error) {
+	randPort := -1
+	for !isPortAvailable(randPort) {
+		randPort = 10000 + rand.Int()%3*10000 + rand.Int()%33 + 333
+	}
+	cmd := exec.Command(ssrPath, "-s", ssr.Server, "-p", string(ssr.ServerPort), "-m", ssr.Method, "-k", ssr.Password,
+		"-O", ssr.Protocol, "-o", ssr.Obfs, "-b", "127.0.0.1", "-l", strconv.Itoa(randPort),
+	)
+	// fmt.Println(cmd.Args)
+	if err = cmd.Start(); err != nil {
+		return nil, err
+	}
+	time.Sleep(timeout) // Wait For SSR ready
+	b, err = wGetRawFastBySOCKS5Proxy(uriAddr, fmt.Sprintf("127.0.0.1:%d", randPort), timeout)
+	for i := 0; i < 3 && err != nil; i++ {
+		time.Sleep(2 * timeout) // Wait For SSR ready
+		b, err = wGetRawFastBySOCKS5Proxy(uriAddr, fmt.Sprintf("127.0.0.1:%d", randPort), timeout)
+	}
 	cmd.Process.Kill()
 	return
 }

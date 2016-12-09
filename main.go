@@ -8,13 +8,14 @@ import (
 
 	"log"
 
+	"strings"
+
 	"github.com/chenhw2/shadowsocks-helper/ssStruct"
 	"github.com/urfave/cli"
 )
 
 func init() {
 	rand.Seed(int64(time.Now().Nanosecond()))
-
 }
 
 func main() {
@@ -144,7 +145,7 @@ func main() {
 			},
 			Action: func(c *cli.Context) error {
 				// fmt.Println("ssr2json task: ", c.String("ssr"), c.String("protocol"), c.String("obfs"))
-				ssr, err := ssStruct.ParseSSRFromURI(c.String("ss"))
+				ssr, err := ssStruct.ParseSSRFromURI(c.String("ssr"))
 				if err != nil {
 					log.Printf("%+v", err)
 				} else {
@@ -156,7 +157,7 @@ func main() {
 		{
 			Name:     "dnsmasq",
 			Category: "HELPER",
-			Usage:    "Gen DNSMASQ(server/ipset) from GFWLIST(online) with SSR-Proxy(optional)",
+			Usage:    "generate DNSMASQ(server/ipset) from GFWLIST(online) with SSR-Proxy(optional)",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "server, s",
@@ -171,9 +172,46 @@ func main() {
 				cli.StringFlag{
 					Name:  "proxy, p",
 					Usage: "only support [ssr://host:port:protocol:method:obfs:pass]",
+				},
+				cli.StringFlag{
+					Name:  "path, b",
+					Usage: "`PATH` of ssr-local (Need if proxy is not empty)",
 				}},
 			Action: func(c *cli.Context) error {
-				fmt.Println("dnsmasq task: ", c.String("server"), c.String("ipset"), c.String("proxy"))
+				// fmt.Println("dnsmasq task: ", c.String("server"), c.String("ipset"), c.String("proxy"), c.String("path"))
+				var (
+					base64Str string
+					err       error
+				)
+				if len(c.String("proxy")) == 0 {
+					base64Str, err = wGet(officalGFWListURL)
+				} else {
+					ssr, err := ssStruct.ParseSSRFromURI(c.String("proxy"))
+					if err != nil {
+						log.Printf("%+v", err)
+						return nil
+					}
+					funcSSR := ssStruct.FuncSSR{
+						SSR:  *ssr,
+						Path: c.String("path"),
+					}
+					bs, tm, err := funcSSR.WGet(officalGFWListURL, 10*time.Second)
+					fmt.Println("Delay Time:", tm)
+					base64Str = string(bs)
+				}
+				if err != nil {
+					log.Printf("%+v", err)
+				} else {
+					gfwlist, err := ParseGFWList(base64Str)
+					if err != nil {
+						log.Printf("%+v", err)
+					} else {
+						fmt.Println(gfwlist.GenDnsmasqServer(c.String("server")))
+						if !strings.EqualFold(c.String("ipset"), "NULL") {
+							fmt.Println(gfwlist.GenDnsmasqIPset(c.String("ipset")))
+						}
+					}
+				}
 				return nil
 			},
 		},

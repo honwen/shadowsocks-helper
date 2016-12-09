@@ -4,14 +4,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/chenhw2/shadowsocks-helper/ssStruct"
-)
-
-var (
-	isSSRForm = regexp.MustCompile(`ssr:\/\/([a-zA-Z0-9\.\-_]+:)(\d+:)([a-zA-Z0-9\.\-_]+:)+[a-zA-Z0-9]+`)
 )
 
 // ParseSSRFromTEXT Parse ssStruct.SliceSSR From [ssr-list.txt]

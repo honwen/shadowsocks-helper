@@ -16,47 +16,45 @@ const (
 	officalGFWListURL = `https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt`
 )
 
-type GFWList struct {
-	Domains []string
+// GFWList contain GFWed domains
+type GFWList []string
+
+// ParseGFWList Parse GFWList
+func ParseGFWList(base64GFWList string) (gfwlist GFWList, err error) {
+	gfwlist, err = autoProxy2Domains(base64GFWList)
+	return
 }
 
-func ParseGFWList(SSfailSafe []string) (*GFWList, error) {
-	base64GFWList, err := wGetWithSSFailsafe(officalGFWListURL, SSfailSafe)
-	if err != nil {
-		return nil, err
-	}
-	domains, err := autoProxy2Domains(base64GFWList)
-	if err != nil {
-		return nil, err
-	}
-	gfwList := &GFWList{
-		Domains: domains,
-	}
-	return gfwList, nil
-}
-
+// GenDnsmasqIPset with specify ipset
 func (gfwList *GFWList) GenDnsmasqIPset(ipset string) string {
-	var str bytes.Buffer
-	var w io.Writer = &str
-	for _, s := range gfwList.Domains {
+	var (
+		str bytes.Buffer
+		w   io.Writer = &str
+	)
+	for _, s := range *gfwList {
 		io.WriteString(w, fmt.Sprintf("ipset=/%s/%s\n", s, ipset))
 	}
 	return str.String()
 }
 
+// GenDnsmasqServer with specify server
 func (gfwList *GFWList) GenDnsmasqServer(dns string) string {
-	var str bytes.Buffer
-	var w io.Writer = &str
-	for _, s := range gfwList.Domains {
+	var (
+		str bytes.Buffer
+		w   io.Writer = &str
+	)
+	for _, s := range *gfwList {
 		io.WriteString(w, fmt.Sprintf("server=/%s/%s\n", s, dns))
 	}
 	return str.String()
 }
 
 func (gfwList GFWList) String() string {
-	var str bytes.Buffer
-	var w io.Writer = &str
-	for _, s := range gfwList.Domains {
+	var (
+		str bytes.Buffer
+		w   io.Writer = &str
+	)
+	for _, s := range gfwList {
 		io.WriteString(w, s)
 		io.WriteString(w, "\n")
 	}

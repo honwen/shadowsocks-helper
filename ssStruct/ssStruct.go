@@ -46,8 +46,8 @@ const (
 
 // Regexp to Check URI
 var (
-	RegxIsSSURI  = regexp.MustCompile(`ss:\/\/([a-zA-Z0-9\.\-_]+):([a-zA-Z0-9\.\-_]+)@([a-zA-Z0-9\.\-_]+):(\d+)`)
-	RegxIsSSRURI = regexp.MustCompile(`ssr:\/\/([a-zA-Z0-9\.\-_]+:)(\d+:)([a-zA-Z0-9\.\-_]+:)+[a-zA-Z0-9]+`)
+	RegxIsSSURI  = regexp.MustCompile(`ss:\/\/([a-zA-Z0-9\.\-_]+):([^ @]+)@([a-zA-Z0-9\.\-_]+):(\d+)`)
+	RegxIsSSRURI = regexp.MustCompile(`ssr:\/\/([a-zA-Z0-9\.\-_]+:)(\d+:)([a-zA-Z0-9\.\-_]+:)+\S+`)
 )
 
 // SS original

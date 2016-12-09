@@ -157,7 +157,7 @@ func main() {
 				},
 			},
 			Action: func(c *cli.Context) error {
-				// fmt.Println("ssr2json task: ", c.String("ssr"), c.String("protocol"), c.String("obfs"))
+				// fmt.Println("ssr2json task: ", c.String("ssr"))
 				ssr, err := ssStruct.ParseSSRFromURI(c.String("ssr"))
 				if err != nil {
 					log.Printf("%+v", err)
@@ -266,6 +266,7 @@ func main() {
 					ssTC = ssStruct.TestCaseTiny
 				}
 				if len(c.String("justone")) > 0 {
+					fmt.Println(c.String("justone"))
 					ssr, err := ssStruct.ParseSSRFromURI(c.String("justone"))
 					if err != nil {
 						log.Printf("%+v", err)

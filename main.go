@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/chenhw2/go-ps" /*ps*/
 	"github.com/chenhw2/shadowsocks-helper/ssStruct"
 	"github.com/urfave/cli"
 )
@@ -32,6 +33,7 @@ func init() {
 	go func() {
 		<-cleanup
 		psClean(os.Getpid())
+		os.Exit(-1)
 	}()
 
 	switch runtime.GOOS {
@@ -341,4 +343,21 @@ func wGet(urlAddr string) (string, error) {
 func getCurrDir(fn string) (path string) {
 	path, _ = filepath.Abs(filepath.Dir(os.Args[0]))
 	return filepath.Join(path, fn)
+}
+
+func psClean(pid int) {
+	childPs, _ := ps.FilterProcesses(func(p ps.Process) bool {
+		return p.Pid() == pid
+	})
+	if childPs == nil {
+		if p, err := os.FindProcess(pid); err == nil {
+			if err = p.Signal(os.Kill); err != nil {
+				p.Kill()
+			}
+		}
+	} else {
+		for _, ps := range childPs {
+			psClean(ps.Pid())
+		}
+	}
 }

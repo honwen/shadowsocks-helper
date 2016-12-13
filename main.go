@@ -347,7 +347,7 @@ func getCurrDir(fn string) (path string) {
 
 func psClean(pid int) {
 	childPs, _ := ps.FilterProcesses(func(p ps.Process) bool {
-		return p.Pid() == pid
+		return p.PPid() == pid
 	})
 	if childPs == nil {
 		if p, err := os.FindProcess(pid); err == nil {

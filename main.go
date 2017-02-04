@@ -320,6 +320,7 @@ func main() {
 		},
 	}
 	app.Run(os.Args)
+	psClean(os.Getpid())
 }
 
 // Get return text of url

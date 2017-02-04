@@ -28,9 +28,10 @@ type pair struct {
 
 var (
 	testCases = []pair{
-		pair{"http://dl.google.com/pinyin/v2/GooglePinyinInstaller.exe", 60 * time.Second}, /*size: 15.7M, AtLeast 261KB/s*/
-		pair{"http://dl.google.com/dl/picasa/gpautobackup_setup.exe", 20 * time.Second},    /*size: 2.5M,  AtLeast 125KB/s*/
-		pair{"http://www.google.com/robots.txt", 3 * time.Second},                          /*size: 6.3K,  AtLeast 2.1KB/s*/
+		// pair{"http://dl.google.com/pinyin/v2/GooglePinyinInstaller.exe", 60 * time.Second}, /*size: 15.7M, AtLeast 261KB/s*/
+		pair{"http://go.microsoft.com/fwlink/?LinkId=691209", 60 * time.Second},         /*size: 17.4M, AtLeast 290KB/s*/
+		pair{"http://dl.google.com/dl/picasa/gpautobackup_setup.exe", 20 * time.Second}, /*size: 2.5M,  AtLeast 125KB/s*/
+		pair{"http://www.google.com/robots.txt", 3 * time.Second},                       /*size: 6.3K,  AtLeast 2.1KB/s*/
 	}
 )
 
@@ -257,7 +258,7 @@ func (ssr *FuncSSR) SpeedTest(url string, timeout time.Duration) error {
 	tmBegin := time.Now()
 	if bytes, tmdelay, err := ssr.WGet(url, timeout); err == nil {
 		tmTotal := time.Now().Sub(tmBegin) - tmdelay
-		ssr.Speed = float64(len(bytes)) / float64(tmTotal.Nanoseconds()) * 1000.0 // Bytes / * 1000 => MB/s
+		ssr.Speed = float64(len(bytes)) / float64(tmTotal.Nanoseconds()) * 1000.0 // Bytes / Nanoseconds * 1000 => MB/s
 		if ssr.Speed < 0.0005 {
 			ssr.Speed = -1
 		}

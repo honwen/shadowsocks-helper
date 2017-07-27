@@ -209,10 +209,15 @@ func main() {
 				// fmt.Println("dnsmasq task: ", c.String("server"), c.String("ipset"), c.String("proxy"), c.String("path"))
 				var (
 					base64Str string
+					extraList string
 					err       error
 				)
 				if len(c.String("proxy")) == 0 {
 					base64Str, err = wGet(officalGFWListURL)
+					if err == nil {
+						extraList, err = wGet(officalGoogleDomain)
+					}
+					extraList += strings.Replace(extraList, "google", "blogspot", -1)
 				} else {
 					ssr, err := ssStruct.ParseSSRFromURI(c.String("proxy"))
 					if err != nil {
@@ -223,14 +228,20 @@ func main() {
 						SSR:  *ssr,
 						Path: c.String("path"),
 					}
-					bs, tm, err := funcSSR.WGet(officalGFWListURL, 10*time.Second)
+					gfwb64, tm, err := funcSSR.WGet(officalGFWListURL, 10*time.Second)
 					fmt.Println("Delay Time:", tm)
-					base64Str = string(bs)
+					base64Str = string(gfwb64)
+					if err == nil {
+						bs, _, _ := funcSSR.WGet(officalGoogleDomain, 10*time.Second)
+						extraList = string(bs)
+						extraList += strings.Replace(extraList, "google", "blogspot", -1)
+						fmt.Println(extraList)
+					}
 				}
 				if err != nil {
 					log.Printf("%+v", err)
 				} else {
-					gfwlist, err := ParseGFWList(base64Str)
+					gfwlist, err := ParseGFWList(base64Str, extraList)
 					if err != nil {
 						log.Printf("%+v", err)
 					} else {

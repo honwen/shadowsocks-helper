@@ -10,18 +10,21 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/Workiva/go-datastructures/set"
 )
 
 const (
-	officalGFWListURL = `https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt`
+	officalGFWListURL   = `https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt`
+	officalGoogleDomain = `https://www.google.com/supported_domains`
 )
 
 // GFWList contain GFWed domains
 type GFWList []string
 
 // ParseGFWList Parse GFWList
-func ParseGFWList(base64GFWList string) (gfwlist GFWList, err error) {
-	gfwlist, err = autoProxy2Domains(base64GFWList)
+func ParseGFWList(base64GFWList, extraList string) (gfwlist GFWList, err error) {
+	gfwlist, err = autoProxy2Domains(base64GFWList, extraList)
 	return
 }
 
@@ -61,13 +64,15 @@ func (gfwList GFWList) String() string {
 	return str.String()
 }
 
-func autoProxy2Domains(base64Str string) (Domains []string, err error) {
+func autoProxy2Domains(base64Str, extraList string) (Domains []string, err error) {
 	gfwlistDEC, err := base64.StdEncoding.DecodeString(base64Str)
 	if err != nil {
 		return nil, err
 	}
 	// ---------------------------------gfwlist---------------------------------
-	sites := make(map[string]struct{}, 0)
+	sites := set.New()
+	gfwlistDEC = append(gfwlistDEC, []byte(initList)...)
+	gfwlistDEC = append(gfwlistDEC, []byte(extraList)...)
 	scanner := bufio.NewScanner(bytes.NewReader(gfwlistDEC))
 	for scanner.Scan() {
 		s := strings.TrimSpace(scanner.Text())
@@ -91,7 +96,9 @@ func autoProxy2Domains(base64Str string) (Domains []string, err error) {
 				parts := strings.SplitN(site, ".", 2)
 				site = parts[len(parts)-1]
 			}
-			sites[site] = struct{}{}
+			sites.Add(site)
+		case strings.HasPrefix(s, "|https://"):
+			fallthrough
 		case strings.HasPrefix(s, "|http://"):
 			if u, err := url.Parse(s[1:]); err == nil {
 				site := u.Host
@@ -103,15 +110,15 @@ func autoProxy2Domains(base64Str string) (Domains []string, err error) {
 					parts := strings.SplitN(site, ".", 2)
 					site = parts[len(parts)-1]
 				}
-				sites[site] = struct{}{}
+				sites.Add(site)
 			}
 		case strings.HasPrefix(s, "."):
 			site := strings.Split(strings.Split(s[1:], "/")[0], "*")[0]
-			sites[site] = struct{}{}
+			sites.Add(site)
 		case !strings.ContainsAny(s, "*"):
 			site := strings.Split(s, "/")[0]
 			if regexp.MustCompile(`^[a-zA-Z0-9\.\_\-]+$`).MatchString(site) {
-				sites[site] = struct{}{}
+				sites.Add(site)
 			}
 		}
 	}
@@ -119,9 +126,17 @@ func autoProxy2Domains(base64Str string) (Domains []string, err error) {
 		return
 	}
 	// ---------------------------------gfwlist---------------------------------
-	for s := range sites {
-		Domains = append(Domains, s)
+	for _, site := range sites.Flatten() {
+		if strings.ContainsAny(site.(string), ".") {
+			Domains = append(Domains, site.(string))
+		}
 	}
 	sort.Strings(Domains)
 	return
 }
+
+const initList = `
+whatsapp.com
+whatsapp.net
+twimg.edgesuite.net
+`

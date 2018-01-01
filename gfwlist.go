@@ -85,6 +85,10 @@ func autoProxy2Domains(base64Str, extraList string) (Domains []string, err error
 			continue
 		}
 
+		if unURL, err := url.QueryUnescape(s); err == nil {
+			s = unURL
+		}
+
 		switch {
 		case strings.HasPrefix(s, "||"):
 			site := strings.Split(s[2:], "/")[0]

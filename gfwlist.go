@@ -19,6 +19,8 @@ const (
 	officalGoogleDomain = `https://www.google.com/supported_domains`
 )
 
+const regxIP = `(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)`
+
 // GFWList contain GFWed domains
 type GFWList []string
 
@@ -135,8 +137,35 @@ func autoProxy2Domains(base64Str, extraList string) (Domains []string, err error
 			Domains = append(Domains, site.(string))
 		}
 	}
+
+	// ----------------------------------sort-----------------------------------
+	regexpISIP := regexp.MustCompile(regxIP)
+	spDomains := []string{}
+	for i := 0; i < len(Domains); {
+		if strings.HasPrefix(Domains[i], "google.") || strings.HasPrefix(Domains[i], "blogspot.") ||
+			regexpISIP.MatchString(Domains[i]) {
+			spDomains = append(spDomains, Domains[i])
+			Domains = append(Domains[:i], Domains[i+1:]...)
+		} else {
+			Domains[i] = reverseString(Domains[i])
+			i++
+		}
+	}
+	sort.Strings(spDomains)
 	sort.Strings(Domains)
+	for i := range Domains {
+		Domains[i] = reverseString(Domains[i])
+	}
+	Domains = append(spDomains, Domains...)
 	return
+}
+
+func reverseString(s string) string {
+	runes := []rune(s)
+	for from, to := 0, len(runes)-1; from < to; from, to = from+1, to-1 {
+		runes[from], runes[to] = runes[to], runes[from]
+	}
+	return string(runes)
 }
 
 const initList = `

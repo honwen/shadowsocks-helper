@@ -9,15 +9,19 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"syscall"
 	"time"
 
+	cidrman "github.com/EvilSuperstars/go-cidrman"
 	"github.com/chenhw2/go-ps" /*ps*/
 	"github.com/chenhw2/shadowsocks-helper/ssStruct"
 	"github.com/urfave/cli"
 )
+
+const ipipCHN = "https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt"
 
 var (
 	version        = "MISSING build version [git hash]"
@@ -325,6 +329,76 @@ func main() {
 				}
 				for idx := range fssr {
 					fmt.Printf("Speed:%6.03fMB/s, %s\n", fssr[idx].Speed, fssr[idx])
+				}
+				return nil
+			},
+		},
+		{
+			Name:     "ipset",
+			Category: "HELPER",
+			Usage:    "Minify chnroute.txt",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "input, i",
+					Value: "chnroute.txt",
+					Usage: "specify `PATH` of chnroute.txt",
+				},
+				cli.BoolFlag{
+					Name:  "online, n",
+					Usage: "Get chnroute.txt from [IPIP.NET]",
+				},
+				cli.StringFlag{
+					Name:  "proxy, p",
+					Usage: "only support [ssr://host:port:protocol:method:obfs:pass]",
+				},
+				cli.Int64Flag{
+					Name:  "maxMask, m",
+					Value: 16,
+					Usage: "Like: 192.168.1.1/13",
+				}},
+			Action: func(c *cli.Context) error {
+				var (
+					chnroute string
+					err      error
+				)
+				if c.BoolT("online") {
+					if len(c.String("proxy")) == 0 {
+						chnroute, err = wGet(ipipCHN)
+					} else {
+						ssr, err := ssStruct.ParseSSRFromURI(c.String("proxy"))
+						if err != nil {
+							log.Printf("%+v", err)
+							return nil
+						}
+						funcSSR := ssStruct.FuncSSR{
+							SSR:  *ssr,
+							Path: c.String("path"),
+						}
+						bytes, tm, err := funcSSR.WGet(ipipCHN, 10*time.Second)
+						fmt.Println("Delay Time:", tm)
+						chnroute = string(bytes)
+					}
+				} else {
+					var bytes []byte
+					if bytes, err = readFileAll(c.String("input")); err != nil {
+						return err
+					}
+					chnroute = string(bytes)
+				}
+				maxMask := c.Int64("maxMask")
+				if maxMask > 31 {
+					maxMask = 31
+				}
+				if maxMask < 5 {
+					maxMask = 5
+				}
+				// fmt.Println(chnroute)
+				for i := int64(32); i > maxMask; i-- {
+					chnroute = regexp.MustCompile(fmt.Sprintf("/%d", i)).ReplaceAllString(chnroute, fmt.Sprintf("/%d", i-1))
+				}
+				chnipset, _ := cidrman.MergeCIDRs(strings.Split(chnroute, "\n"))
+				for _, v := range chnipset {
+					fmt.Println(v)
 				}
 				return nil
 			},

@@ -169,6 +169,8 @@ func reverseString(s string) string {
 }
 
 const initList = `
+otcbtc.com
+wikipedia.org
 whatsapp.com
 whatsapp.net
 twimg.edgesuite.net

@@ -120,7 +120,9 @@ func autoProxy2Domains(base64Str, extraList string) (Domains []string, err error
 			}
 		case strings.HasPrefix(s, "."):
 			site := strings.Split(strings.Split(s[1:], "/")[0], "*")[0]
-			sites.Add(site)
+			if !strings.HasSuffix(site, ".") {
+				sites.Add(site)
+			}
 		case !strings.ContainsAny(s, "*"):
 			site := strings.Split(s, "/")[0]
 			if regexp.MustCompile(`^[a-zA-Z0-9\.\_\-]+$`).MatchString(site) {

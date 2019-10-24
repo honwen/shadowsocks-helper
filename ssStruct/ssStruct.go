@@ -225,8 +225,8 @@ func wGetRawFastBySOCKS5Proxy(urlAddr, proxyAddr string, timeout time.Duration) 
 	}
 	client := &http.Client{
 		Transport: &http.Transport{
-			Proxy: nil,
-			Dial:  proxy.Dial,
+			Proxy:                 nil,
+			Dial:                  proxy.Dial,
 			ResponseHeaderTimeout: 3 * time.Second,
 			IdleConnTimeout:       timeout,
 			DisableKeepAlives:     true,

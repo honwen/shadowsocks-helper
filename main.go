@@ -18,6 +18,7 @@ import (
 	cidrman "github.com/EvilSuperstars/go-cidrman"
 	"github.com/chenhw2/go-ps" /*ps*/
 	"github.com/chenhw2/shadowsocks-helper/ssStruct"
+	"github.com/chenhw2/shadowsocks-helper/subscribe"
 	"github.com/urfave/cli"
 )
 
@@ -54,6 +55,42 @@ func main() {
 	app.Usage = "shadowsocks(R)-helper"
 	app.Version = version
 	app.Commands = []cli.Command{
+		{
+			Name:     "subscribe2ssr",
+			Category: "CONVERTER",
+			Usage:    "convert FROM[subscribe_url] to URI[ssr://host:port:protocol:method:obfs:pass]",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "url, s",
+					Usage: "specify `URL` of Subscribe",
+				},
+				cli.BoolFlag{
+					Name:  "test, t",
+					Usage: "SpeedTest of each ssr",
+				},
+			},
+			Action: func(c *cli.Context) error {
+				// fmt.Println("subscribe2ssr task: ", c.String("url"))
+				ssrURIs, ssrRemarks := subscribe.URL2URIs(c.String("url"))
+				for i := 0; i < len(ssrURIs); i++ {
+					ssr := ssrURIs[i]
+					remark := ssrRemarks[i]
+					remark = regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(remark, "")
+					remark += regexp.MustCompile(`.*@([^:]*):.*`).ReplaceAllString(ssr, `_$1`)
+					fmt.Printf("%-24s : %s", remark, ssr)
+					if c.Bool("t") {
+						if data, t, err := subscribe.WGetRawFastBySSRProxy(`https://myip.ipip.net`, ssr, 15*time.Second); err == nil {
+							fmt.Printf(` # %s : %s`, strings.ReplaceAll(string(data), "\n", ""), t.String())
+						} else {
+							fmt.Printf(` # BAD`)
+						}
+					}
+					fmt.Println(``)
+
+				}
+				return nil
+			},
+		},
 		{
 			Name:     "json2ssr",
 			Category: "CONVERTER",

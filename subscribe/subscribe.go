@@ -25,13 +25,14 @@ var (
 	reSSRInfo = regexp.MustCompile(`(\S+):(\S+):(\S+):(\S+):(\S+):([^/]+)(/?\S+)?`)
 )
 
-func base64Decode(str string, enc *base64.Encoding) string {
+func base64Decode(str string, enc *base64.Encoding) []byte {
+	str += strings.Repeat(`=`, (4-(len(str)%4))%4)
 	rawBytes, err := enc.DecodeString(str)
 	if err != nil {
 		// handle err
 		log.Fatal(str, err)
 	}
-	return string(rawBytes)
+	return rawBytes
 }
 
 // URL2URIs gen SSR-URIs
@@ -61,55 +62,43 @@ func URL2URIs(uri string) (ssrURIs, ssrRemarks []string) {
 	}
 	bodyString := string(bodyBytes)
 
-	rawData, err := base64.StdEncoding.DecodeString(bodyString)
-	if err != nil {
-		// handle err
-		log.Fatal(err)
-	}
+	rawData := base64Decode(bodyString, base64.StdEncoding)
 
 	scanner := bufio.NewScanner(bytes.NewReader(rawData))
 	for scanner.Scan() {
 		raw := reSSR.ReplaceAllString(strings.TrimSpace(scanner.Text()), `$1`)
-		raw += strings.Repeat(`=`, (4-(len(raw)%4))%4)
-		uriBytes, err := base64.URLEncoding.DecodeString(raw)
-		if err != nil {
-			// handle err
-			log.Fatal(err)
-		}
-		uri = string(uriBytes)
+		uri = string(base64Decode(raw, base64.URLEncoding))
 
 		method := reSSRInfo.ReplaceAllString(uri, `$4`)
 
 		password := reSSRInfo.ReplaceAllString(uri, `$6`)
-		password += strings.Repeat(`=`, (4-(len(password)%4))%4)
-		password = base64Decode(password, base64.StdEncoding)
+		password = string(base64Decode(password, base64.StdEncoding))
 
 		server := reSSRInfo.ReplaceAllString(uri, `$1:$2`)
 
 		u, err := url.Parse(reSSRInfo.ReplaceAllString(uri, `$7`))
 		if err != nil {
+			// handle err
 			log.Fatal(err)
 		}
 		params, err := url.ParseQuery(u.RawQuery)
 		if err != nil {
+			// handle err
 			log.Fatal(err)
 		}
 		obfs := reSSRInfo.ReplaceAllString(uri, `$5`)
 		obfsparam := params["obfsparam"][0]
-		obfsparam += strings.Repeat(`=`, (4-(len(obfsparam)%4))%4)
-		obfsparam = base64Decode(obfsparam, base64.StdEncoding)
+		obfsparam = string(base64Decode(obfsparam, base64.StdEncoding))
 		if strings.Contains(obfsparam, `,`) {
 			obfsparam = (strings.Split(obfsparam, `,`))[0]
 		}
 
 		proto := reSSRInfo.ReplaceAllString(uri, `$3`)
 		protoparam := params["protoparam"][0]
-		protoparam += strings.Repeat(`=`, (4-(len(protoparam)%4))%4)
-		protoparam = base64Decode(protoparam, base64.StdEncoding)
+		protoparam = string(base64Decode(protoparam, base64.StdEncoding))
 
 		remark := params["remarks"][0]
-		remark += strings.Repeat(`=`, (4-(len(remark)%4))%4)
-		remark = base64Decode(remark, base64.URLEncoding)
+		remark = string(base64Decode(remark, base64.URLEncoding))
 		remark = regexp.MustCompile(`\s`).ReplaceAllString(remark, "")
 
 		ssr := fmt.Sprintf(

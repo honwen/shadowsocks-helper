@@ -68,7 +68,9 @@ func URL2URIs(uri string) (ssrURIs, ssrRemarks []string) {
 	for scanner.Scan() {
 		raw := reSSR.ReplaceAllString(strings.TrimSpace(scanner.Text()), `$1`)
 		uri = string(base64Decode(raw, base64.URLEncoding))
-
+		if len(uri) < 16 {
+			return
+		}
 		method := reSSRInfo.ReplaceAllString(uri, `$4`)
 
 		password := reSSRInfo.ReplaceAllString(uri, `$6`)

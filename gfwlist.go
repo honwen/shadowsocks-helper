@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"index/suffixarray"
 	"io"
 	"net/url"
 	"regexp"
@@ -158,7 +159,34 @@ func autoProxy2Domains(base64Str, extraList string) (Domains []string, err error
 	for i := range Domains {
 		Domains[i] = reverseString(Domains[i])
 	}
-	Domains = append(spDomains, Domains...)
+	coreDomains := []string{}
+	idx := suffixarray.New([]byte(strings.Join(Domains, "")))
+	for i := range Domains {
+		offsets := idx.Lookup([]byte("."+Domains[i]), 1)
+		if len(offsets) > 0 {
+			coreDomains = append(coreDomains, Domains[i])
+		}
+	}
+	tidedDomains := []string{}
+	for i := range Domains {
+		cnt := 0
+		idx = suffixarray.New([]byte(Domains[i]))
+		for ii := range coreDomains {
+			offsets := idx.Lookup([]byte("."+coreDomains[ii]), 1)
+			cnt += len(offsets)
+		}
+		if cnt == 0 {
+			tidedDomains = append(tidedDomains, Domains[i])
+		}
+	}
+	for i := range tidedDomains {
+		tidedDomains[i] = reverseString(tidedDomains[i])
+	}
+	sort.Strings(tidedDomains)
+	for i := range tidedDomains {
+		tidedDomains[i] = reverseString(tidedDomains[i])
+	}
+	Domains = append(spDomains, tidedDomains...)
 	return
 }
 
@@ -171,10 +199,108 @@ func reverseString(s string) string {
 }
 
 const initList = `
+000webhost.com
+0zmedia.com
+adobe.com
+akamaiedge.net
+akamaihd.net
+akamai.net
+amazonaws.com
+ampproject.org
+androidapksfree.com
+apkcombo.com
+apple.news
+apps.evozi.com
+aws.amazon.com
+azureedge.net
+backpackers.com.tw
 bing.com
+bitfinex.com
+buzzfeed.com
+china-internet-exchange.com
+clockwise.ee
+cloudfront.net
+cnbc.com
+coindesk.com
+coinsquare.io
+cryptocompare.com
+cryptographyengineering.com
+dailysabah.com
+dlercloud.com
+dropboxstatic.com
+e-classical.com.tw
+edgekey.net
+edgesuite.net
+edx-cdn.org
+etherscan.io
+eurecom.fr
+facebook.com
+fastly.net
+firstpost.com
+fontawesome.com
+gdax.com
+ggpht.com
+github.com
+github.io
+githubusercontent.com
+gnews.org
+googleapis.com
+googlecode.com
+google.com
+google.com.hk
+googledrive.com
+googlefiber.net
+googlepages.com
+googlesource.com
+googleusercontent.com
+googlevideo.com
+greasyfork.org
+gstatic.com
+hkmap.live
+invidio.us
+kknews.cc
+lihkg.com
+limbopro.xyz
+mastodon.xyz
+maying.co
+mergersandinquisitions.com
+metafilter.com
+nbcnews.com
+newyorker.com
+nexitally.com
+nexitcore.com
+nutaq.com
+openairinterface.org
 otcbtc.com
-wikipedia.org
+oxfordscholarship.com
+pornstarbyface.com
+project-syndicate.org
+sinoinsider.com
+skype.com
+sleazyfork.org
+streamate.com
+sublimetext.com
+t66y.com
+telegra.ph
+textnow.com
+textnow.me
+theatlantic.com
+timtales.com
+trouter.io
+twimg.edgesuite.net
+twitter.com
+uploaded.net
+userstyles.org
+v2fly.org
+v2raycn.com
+weverse.io
 whatsapp.com
 whatsapp.net
-twimg.edgesuite.net
+wikipedia.org
+wsj.net
+yande.re
+ycombinator.com
+youtu.be
+youtube.com
+ytimg.com
 `

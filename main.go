@@ -17,6 +17,7 @@ import (
 
 	cidrman "github.com/EvilSuperstars/go-cidrman"
 	"github.com/chenhw2/go-ps" /*ps*/
+	"github.com/chenhw2/shadowsocks-helper/cidr"
 	"github.com/chenhw2/shadowsocks-helper/ssStruct"
 	"github.com/chenhw2/shadowsocks-helper/subscribe"
 	"gopkg.in/urfave/cli.v1"
@@ -218,6 +219,27 @@ func main() {
 					log.Printf("%+v", err)
 				} else {
 					fmt.Println(ssr.JSON())
+				}
+				return nil
+			},
+		},
+		{
+			Name:     "cidr",
+			Category: "HELPER",
+			Usage:    "generate CIDRs of google/netflix, etc",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "target, s",
+					Value: "google",
+				}},
+			Action: func(c *cli.Context) error {
+				cidrs := []string{}
+				switch c.String("target") {
+				case "google":
+					cidrs, _ = cidrman.MergeCIDRs(cidr.Google())
+				}
+				for _, v := range cidrs {
+					fmt.Println(v)
 				}
 				return nil
 			},

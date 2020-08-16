@@ -16,7 +16,8 @@ import (
 )
 
 const (
-	officalGFWListURL   = `https://cdn.jsdelivr.net/gh/Loukky/gfwlist-by-loukky@master/gfwlist.txt`
+	officalGFWListURL = `https://cdn.jsdelivr.net/gh/Loukky/gfwlist-by-loukky@master/gfwlist.txt`
+	// officalGFWListURL   = `https://cdn.jsdelivr.net/gh/gfwlist/gfwlist@master/gfwlist.txt`
 	officalGoogleDomain = `https://www.google.com/supported_domains`
 )
 
@@ -204,7 +205,6 @@ const initList = `
 0zmedia.com
 adobe.com
 akamaiedge.net
-akamaihd.net
 akamai.net
 amazonaws.com
 ampproject.org
@@ -1009,6 +1009,7 @@ hkmap.live
 doubmirror.cf
 softsmirror.cf
 ra.gg
+discord.gg
 upmedia.mg
 storm.mg
 bbs.hasi.wang
@@ -1023,6 +1024,7 @@ mswe1.org
 blog.fuckgfw233.org
 ssl443.org
 https443.org
+ao3.org
 mypop3.org
 lists.w3.org
 luke54.org
@@ -2297,6 +2299,7 @@ deja.com
 matainja.com
 www.powerpointninja.com
 megurineluka.com
+gagaoolala.com
 ooyala.com
 assembla.com
 anthonycalzadilla.com
@@ -2567,6 +2570,7 @@ tweetboard.com
 razyboard.com
 kepard.com
 popyard.com
+discord.com
 dnsrd.com
 from-sd.com
 soundcloud.com
@@ -3148,6 +3152,7 @@ dessci.com
 tuzaijidi.com
 vivaldi.com
 dalailamahindi.com
+huhangfei.com
 ranyunfei.com
 nikkei.com
 bianlei.com
@@ -3487,6 +3492,7 @@ dajiyuan.com
 mingpaovan.com
 w.idaiwan.com
 thinkingtaiwan.com
+caijinglengyan.com
 unblock.cn.com
 fc2cn.com
 usacn.com
@@ -3728,6 +3734,7 @@ wn.com
 laptoplockdown.com
 uptodown.com
 readydown.com
+archiveofourown.com
 zozotown.com
 yvesgeleyn.com
 libsyn.com
@@ -3773,6 +3780,7 @@ roodo.com
 linkideo.com
 megavideo.com
 googlevideo.com
+parsevideo.com
 livevideo.com
 muslimvideo.com
 amazonvideo.com
@@ -5055,6 +5063,7 @@ hotels.cn
 qixianglu.cn
 vanemu.cn
 zmw.cn
+radio.garden
 facebook.design
 tuo8.in
 avdb.in
@@ -5286,6 +5295,7 @@ happyon.jp
 orn.jp
 next11.co.jp
 tma.co.jp
+kadokawa.co.jp
 sod.co.jp
 blog.excite.co.jp
 blog.exblog.co.jp
@@ -5798,6 +5808,7 @@ webwarper.net
 vpser.net
 twitbrowser.net
 quantumbooter.net
+nitter.net
 en.favotter.net
 ooklaserver.net
 cdn.softlayer.net
@@ -6154,6 +6165,7 @@ greatroc.tw
 digiland.tw
 dcard.tw
 presidentlee.tw
+shopee.tw
 1mobile.tw
 culture.tw
 inote.tw

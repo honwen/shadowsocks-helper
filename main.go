@@ -93,6 +93,22 @@ func main() {
 			},
 		},
 		{
+			Name:     "ssr2clash",
+			Category: "CONVERTER",
+			Usage:    "convert FROM URI[ssr://host:port:protocol:method:obfs:pass] to CLASH config",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "url, s",
+					Usage: "specify `URL` of Subscribe",
+				},
+			},
+			Action: func(c *cli.Context) error {
+				// fmt.Println("ssr2clash task: ", c.String("url"))
+				subscribe.URL2Clash(c.String("url"))
+				return nil
+			},
+		},
+		{
 			Name:     "json2ssr",
 			Category: "CONVERTER",
 			Usage:    "convert FROM[gui-config.json] to URI[ssr://host:port:protocol:method:obfs:pass]",

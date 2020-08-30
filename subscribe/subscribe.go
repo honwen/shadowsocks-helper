@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"hash/crc32"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -25,6 +26,19 @@ var (
 	reSSRInfo = regexp.MustCompile(`(\S+):(\S+):(\S+):(\S+):(\S+):([^/]+)(/?\S+)?`)
 )
 
+const clashTpl = `-
+  name: '%s'
+  type: %s
+  server: '%s'
+  port: %s
+  cipher: '%s'
+  password: '%s'
+  protocol: %s
+  protocol-param: '%s'
+  obfs: %s
+  obfs-param: '%s'
+`
+
 func base64Decode(str string, enc *base64.Encoding) []byte {
 	str += strings.Repeat(`=`, (4-(len(str)%4))%4)
 	rawBytes, err := enc.DecodeString(str)
@@ -33,6 +47,27 @@ func base64Decode(str string, enc *base64.Encoding) []byte {
 		log.Fatal(str, err)
 	}
 	return rawBytes
+}
+
+// URL2Clash gen clash yaml
+func URL2Clash(uri string) (yamlStr string) {
+	// fmt.Println(uri)
+	name := fmt.Sprintf(`%X`, crc32.ChecksumIEEE([]byte(uri)))
+	u, err := url.Parse(reSSRInfo.ReplaceAllString(uri, `$7`))
+	if err != nil {
+		// handle err
+		log.Fatal(err)
+	}
+	// fmt.Printf(`%+v`, u.Hostname())
+	p, err := url.ParseQuery(u.RawQuery)
+	if err != nil {
+		// handle err
+		log.Fatal(err)
+	}
+	// fmt.Printf(`%+v`, p)
+	password, _ := u.User.Password()
+	fmt.Printf(clashTpl, name, u.Scheme, u.Hostname(), u.Port(), u.User.Username(), password, p["protocol"][0], p["protocol_param"][0], p["obfs"][0], p["obfs_param"][0])
+	return
 }
 
 // URL2URIs gen SSR-URIs

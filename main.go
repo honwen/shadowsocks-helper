@@ -320,13 +320,110 @@ func main() {
 				if err != nil {
 					log.Printf("%+v", err)
 				} else {
-					gfwlist, err := ParseGFWList(base64Str, extraList)
+					gfwlist, err := ParseGFWList(base64Str, extraList, false)
 					if err != nil {
 						log.Printf("%+v", err)
 					} else {
 						fmt.Println(gfwlist.GenDnsmasqServer(c.String("server")))
 						if !strings.EqualFold(c.String("ipset"), "NULL") {
 							fmt.Println(gfwlist.GenDnsmasqIPset(c.String("ipset")))
+						}
+					}
+				}
+				return nil
+			},
+		},
+		{
+			Name:     "gfwlist",
+			Category: "HELPER",
+			Usage:    "generate Domain-List from GFWLIST(online) with SSR-Proxy(optional)",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "proxy, p",
+					Usage: "only support [ssr://host:port:protocol:method:obfs:pass]",
+				},
+				cli.StringFlag{
+					Name:  "path, b",
+					Value: defaultSSRPath,
+					Usage: "`PATH` of ssr-local (Need if proxy is not empty)",
+				}},
+			Action: func(c *cli.Context) error {
+				// fmt.Println("gfwlist task: ", c.String("proxy"), c.String("path"))
+				var (
+					base64Str string
+					extraList string
+					err       error
+				)
+				if len(c.String("proxy")) == 0 {
+					base64Str, err = wGet(officalGFWListURL)
+					if err == nil {
+						extraList, err = wGet(officalGoogleDomain)
+					}
+					extraList += strings.Replace(extraList, "google", "blogspot", -1)
+				} else {
+					ssr, err := ssStruct.ParseSSRFromURI(c.String("proxy"))
+					if err != nil {
+						log.Printf("%+v", err)
+						return nil
+					}
+					funcSSR := ssStruct.FuncSSR{
+						SSR:  *ssr,
+						Path: c.String("path"),
+					}
+					gfwb64, tm, err := funcSSR.WGet(officalGFWListURL, 10*time.Second)
+					fmt.Println("Delay Time:", tm)
+					base64Str = string(gfwb64)
+					if err == nil {
+						bs, _, _ := funcSSR.WGet(officalGoogleDomain, 10*time.Second)
+						extraList = string(bs)
+						extraList += strings.Replace(extraList, "google", "blogspot", -1)
+						fmt.Println(extraList)
+					}
+				}
+				if err != nil {
+					log.Printf("%+v", err)
+				} else {
+					gfwlist, err := ParseGFWList(base64Str, extraList, false)
+					if err != nil {
+						log.Printf("%+v", err)
+					} else {
+						fmt.Println(gfwlist)
+					}
+				}
+				return nil
+			},
+		},
+		{
+			Name:     "tide",
+			Category: "HELPER",
+			Usage:    "tide Domain-List",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "input, i",
+					Usage: "path of domain list",
+				},
+				cli.StringFlag{
+					Name:  "output, o",
+					Usage: "path of domain list",
+				}},
+			Action: func(c *cli.Context) error {
+				// fmt.Println("tide task: ", c.String("input"), c.String("output"))
+
+				if dat, err := ioutil.ReadFile(c.String("input")); err != nil {
+					log.Printf("%+v", err)
+					return nil
+				} else {
+					tidelist, err := ParseGFWList("", string(dat), true)
+					if err != nil {
+						log.Printf("%+v", err)
+					} else {
+						if len(c.String("output")) > 0 {
+							err := ioutil.WriteFile(c.String("output"), []byte(tidelist.String()), 0644)
+							if err != nil {
+								panic(err)
+							}
+						} else {
+							fmt.Println(tidelist)
 						}
 					}
 				}

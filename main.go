@@ -471,7 +471,11 @@ func main() {
 				for i := int64(32); i > maxMask; i-- {
 					chnroute = regexp.MustCompile(fmt.Sprintf("/%d", i)).ReplaceAllString(chnroute, fmt.Sprintf("/%d", i-1))
 				}
-				chnipset, _ := cidrman.MergeCIDRs(strings.Split(chnroute, "\n"))
+				chnipset, err := cidrman.MergeCIDRs(strings.Split(chnroute, "\n"))
+				if err != nil {
+					log.Printf("%+v", err)
+					return nil
+				}
 				for _, v := range chnipset {
 					fmt.Println(v)
 				}

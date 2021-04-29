@@ -7,6 +7,8 @@ github.com/Workiva/go-datastructures v1.0.52/go.mod h1:Z+F2Rca0qCsVYDS8z7bAGm8f3
 github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da/go.mod h1:eHEWzANqSiWQsof+nXEI9bUVUyV6F53Fp89EuCh2EAA=
 github.com/andybalholm/cascadia v1.1.0 h1:BuuO6sSfQNFRu1LppgbD25Hr2vLYW25JvxHs5zzsLTo=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
+github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d h1:Byv0BzEl3/e6D5CLfI0j/7hiIEtvGVFPCZ7Ei2oq8iQ=
+github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d/go.mod h1:WaHUgvxTVq04UNunO+XhnAqY/wQc+bxr74GqbsZ/Jqw=
 github.com/chenhw2/go-ps v0.0.0-20161213124314-07c8736d8277 h1:Vj7Ba2XzjFEh8/Nj9sQPNfcFQ1uRrRcCfDEQzUaxQVY=
 github.com/chenhw2/go-ps v0.0.0-20161213124314-07c8736d8277/go.mod h1:C5gI6YVuzQQ/SAWtwA6AU0JGIYOPhTCW3xPKX7Ker+E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -18,6 +20,8 @@ github.com/dgryski/go-idea v0.0.0-20170306091226-d2fb45a411fb/go.mod h1:F7WkpqJj
 github.com/dgryski/go-rc2 v0.0.0-20150621095337-8a9021637152 h1:ED31mPIxDJnrLt9W9dH5xgd/6KjzEACKHBVGQ33czc0=
 github.com/dgryski/go-rc2 v0.0.0-20150621095337-8a9021637152/go.mod h1:I9fhc/EvSg88cDxmfQ47v35Ssz9rlFunL/KY0A1JAYI=
 github.com/ebfe/rc2 v0.0.0-20131011165748-24b9757f5521/go.mod h1:ucvhdsUCE3TH0LoLRb6ShHiJl8e39dGlx6A4g/ujlow=
+github.com/honwen/tldextract v0.1.0 h1:ebl2hs0pxhHZNKqTrWAwt+N9Hf+LI4NH5AUoATZ+v/I=
+github.com/honwen/tldextract v0.1.0/go.mod h1:89LulaARVT8BtmLOXfwhIGkEICCKvlt5gUQ8HpSCAqo=
 github.com/klauspost/cpuid v1.2.1/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/cpuid v1.2.3/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/reedsolomon v1.9.3/go.mod h1:CwCi+NUr9pqSVktrkN+Ondf06rkhYZ/pcNv7fu+8Un4=

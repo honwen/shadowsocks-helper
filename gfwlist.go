@@ -17,8 +17,8 @@ import (
 
 const (
 	// officalGFWListURL = `https://raw.sevencdn.com/Loukky/gfwlist-by-loukky/master/gfwlist.txt`
-	officalGFWListURL = `https://raw.githubusercontent.com/Loukky/gfwlist-by-loukky/master/gfwlist.txt`
-	// officalGFWListURL   = `https://raw.sevencdn.com/gfwlist/gfwlist/master/gfwlist.txt`
+	// officalGFWListURL = `https://raw.githubusercontent.com/Loukky/gfwlist-by-loukky/master/gfwlist.txt`
+	officalGFWListURL   = `https://raw.sevencdn.com/gfwlist/gfwlist/master/gfwlist.txt`
 	officalGoogleDomain = `https://www.google.com/supported_domains`
 )
 
@@ -106,7 +106,7 @@ func autoProxy2Domains(base64Str, extraList string) (Domains []string, err error
 				parts := strings.SplitN(site, ".", 2)
 				site = parts[len(parts)-1]
 			}
-			sites.Add(site)
+			sites.Add(trimSite(site))
 		case strings.HasPrefix(s, "|https://"):
 			fallthrough
 		case strings.HasPrefix(s, "|http://"):
@@ -120,17 +120,17 @@ func autoProxy2Domains(base64Str, extraList string) (Domains []string, err error
 					parts := strings.SplitN(site, ".", 2)
 					site = parts[len(parts)-1]
 				}
-				sites.Add(site)
+				sites.Add(trimSite(site))
 			}
 		case strings.HasPrefix(s, "."):
 			site := strings.Split(strings.Split(s[1:], "/")[0], "*")[0]
 			if !strings.HasSuffix(site, ".") {
-				sites.Add(site)
+				sites.Add(trimSite(site))
 			}
 		case !strings.ContainsAny(s, "*"):
 			site := strings.Split(s, "/")[0]
 			if regexp.MustCompile(`^[a-zA-Z0-9\.\_\-]+$`).MatchString(site) {
-				sites.Add(site)
+				sites.Add(trimSite(site))
 			}
 		}
 	}
@@ -191,6 +191,17 @@ func autoProxy2Domains(base64Str, extraList string) (Domains []string, err error
 	}
 	Domains = append(spDomains, tidedDomains...)
 	return
+}
+
+func trimSite(s string) string {
+	site := strings.TrimSpace(s)
+	switch {
+	case strings.HasSuffix(site, `USA`):
+		site = site[0:strings.Index(site, `USA`)]
+	case strings.HasSuffix(site, `--`):
+		site = site[0:strings.Index(site, `--`)]
+	}
+	return site
 }
 
 func reverseString(s string) string {
@@ -4855,6 +4866,7 @@ hkcnews.com
 usunitednews.com
 thestandnews.com
 porntubenews.com
+efreenews.com
 latelinenews.com
 freemorenews.com
 thehousenews.com
@@ -5910,6 +5922,7 @@ archive.is
 unseen.is
 workflow.is
 pincong.rocks
+mohu.rocks
 ssr.tools
 nyti.ms
 ddns.ms
@@ -6081,6 +6094,7 @@ azureedge.net
 akamaiedge.net
 msedge.net
 sourceforge.net
+ordns.he.net
 streamingthe.net
 wujie.net
 raremovie.net

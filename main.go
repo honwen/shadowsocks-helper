@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -20,6 +22,7 @@ import (
 	"github.com/chenhw2/shadowsocks-helper/cidr"
 	"github.com/chenhw2/shadowsocks-helper/ssStruct"
 	"github.com/chenhw2/shadowsocks-helper/subscribe"
+	"github.com/honwen/golibs/domain"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -287,16 +290,21 @@ func main() {
 			Action: func(c *cli.Context) error {
 				// fmt.Println("dnsmasq task: ", c.String("server"), c.String("ipset"), c.String("proxy"), c.String("path"))
 				var (
-					base64Str string
-					extraList string
-					err       error
+					domains    []string
+					topDomains []string
+					err        error
 				)
+				domains = append(domains, domain.ExtractFromBytes([]byte(initList))...)
 				if len(c.String("proxy")) == 0 {
-					base64Str, err = wGet(officalGFWListURL)
-					if err == nil {
-						extraList, err = wGet(officalGoogleDomain)
+					for it := range officalGFWListURLs {
+						if base64Str, err := wGet(officalGFWListURLs[it]); err == nil {
+							domains = append(domains, domain.ExtractFromB64(base64Str)...)
+						}
 					}
-					extraList += strings.Replace(extraList, "google", "blogspot", -1)
+					if extraList, err := wGet(officalGoogleDomain); err == nil {
+						extraList += strings.Replace(extraList, "google", "blogspot", -1)
+						topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
+					}
 				} else {
 					ssr, err := ssStruct.ParseSSRFromURI(c.String("proxy"))
 					if err != nil {
@@ -307,27 +315,39 @@ func main() {
 						SSR:  *ssr,
 						Path: c.String("path"),
 					}
-					gfwb64, tm, err := funcSSR.WGet(officalGFWListURL, 10*time.Second)
-					fmt.Println("Delay Time:", tm)
-					base64Str = string(gfwb64)
-					if err == nil {
-						bs, _, _ := funcSSR.WGet(officalGoogleDomain, 10*time.Second)
-						extraList = string(bs)
+					for it := range officalGFWListURLs {
+						if base64Str, _, err := funcSSR.WGet(officalGFWListURLs[it], 10*time.Second); err == nil {
+							domains = append(domains, domain.ExtractFromB64(string(base64Str))...)
+						}
+					}
+					if data, _, err := funcSSR.WGet(officalGoogleDomain, 10*time.Second); err == nil {
+						extraList := string(data)
 						extraList += strings.Replace(extraList, "google", "blogspot", -1)
-						fmt.Println(extraList)
+						topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
 					}
 				}
+
+				domains = customsSort(domains, topDomains)
+
 				if err != nil {
 					log.Printf("%+v", err)
 				} else {
-					gfwlist, err := ParseGFWList(base64Str, extraList, false)
 					if err != nil {
 						log.Printf("%+v", err)
 					} else {
-						fmt.Println(gfwlist.GenDnsmasqServer(c.String("server")))
-						if !strings.EqualFold(c.String("ipset"), "NULL") {
-							fmt.Println(gfwlist.GenDnsmasqIPset(c.String("ipset")))
+						var (
+							str bytes.Buffer
+							w   io.Writer = &str
+						)
+						for i := range domains {
+							io.WriteString(w, fmt.Sprintf("server=/%s/%s\n", domains[i], c.String("server")))
 						}
+						if !strings.EqualFold(c.String("ipset"), "NULL") {
+							for i := range domains {
+								io.WriteString(w, fmt.Sprintf("ipset=/%s/%s\n", domains[i], c.String("ipset")))
+							}
+						}
+						fmt.Println(str.String())
 					}
 				}
 				return nil
@@ -350,16 +370,21 @@ func main() {
 			Action: func(c *cli.Context) error {
 				// fmt.Println("gfwlist task: ", c.String("proxy"), c.String("path"))
 				var (
-					base64Str string
-					extraList string
-					err       error
+					domains    []string
+					topDomains []string
+					err        error
 				)
+				domains = append(domains, domain.ExtractFromBytes([]byte(initList))...)
 				if len(c.String("proxy")) == 0 {
-					base64Str, err = wGet(officalGFWListURL)
-					if err == nil {
-						extraList, err = wGet(officalGoogleDomain)
+					for it := range officalGFWListURLs {
+						if base64Str, err := wGet(officalGFWListURLs[it]); err == nil {
+							domains = append(domains, domain.ExtractFromB64(base64Str)...)
+						}
 					}
-					extraList += strings.Replace(extraList, "google", "blogspot", -1)
+					if extraList, err := wGet(officalGoogleDomain); err == nil {
+						extraList += strings.Replace(extraList, "google", "blogspot", -1)
+						topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
+					}
 				} else {
 					ssr, err := ssStruct.ParseSSRFromURI(c.String("proxy"))
 					if err != nil {
@@ -370,20 +395,24 @@ func main() {
 						SSR:  *ssr,
 						Path: c.String("path"),
 					}
-					gfwb64, tm, err := funcSSR.WGet(officalGFWListURL, 10*time.Second)
-					fmt.Println("Delay Time:", tm)
-					base64Str = string(gfwb64)
-					if err == nil {
-						bs, _, _ := funcSSR.WGet(officalGoogleDomain, 10*time.Second)
-						extraList = string(bs)
+					for it := range officalGFWListURLs {
+						if base64Str, _, err := funcSSR.WGet(officalGFWListURLs[it], 10*time.Second); err == nil {
+							domains = append(domains, domain.ExtractFromB64(string(base64Str))...)
+						}
+					}
+					if data, _, err := funcSSR.WGet(officalGoogleDomain, 10*time.Second); err == nil {
+						extraList := string(data)
 						extraList += strings.Replace(extraList, "google", "blogspot", -1)
-						fmt.Println(extraList)
+						topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
 					}
 				}
+
+				domains = customsSort(domains, topDomains)
+
 				if err != nil {
 					log.Printf("%+v", err)
 				} else {
-					gfwlist, err := ParseGFWList(base64Str, extraList, false)
+					gfwlist := strings.Join(domains, "\n")
 					if err != nil {
 						log.Printf("%+v", err)
 					} else {
@@ -413,12 +442,12 @@ func main() {
 					log.Printf("%+v", err)
 					return nil
 				} else {
-					tidelist, err := ParseGFWList("", string(dat), true)
+					tidelist := strings.Join(domain.Sort(domain.ExtractFromBytes(dat)), "\n")
 					if err != nil {
 						log.Printf("%+v", err)
 					} else {
 						if len(c.String("output")) > 0 {
-							err := ioutil.WriteFile(c.String("output"), []byte(tidelist.String()), 0644)
+							err := ioutil.WriteFile(c.String("output"), []byte(tidelist), 0644)
 							if err != nil {
 								panic(err)
 							}

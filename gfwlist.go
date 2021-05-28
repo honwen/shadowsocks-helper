@@ -9,8 +9,27 @@ import (
 	"github.com/honwen/golibs/domain"
 )
 
-// const officalGoogleDomain = `https://www.google.com/supported_domains`
-const officalGoogleDomain = `https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/google`
+var communityDomainLists = []string{
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/google`,
+
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/android`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/blogspot`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/dart`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/fastlane`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/flutter`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/golang`,
+	// `https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/google-ads`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/google-registry`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/google-scholar`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/polymer`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/v8`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/youtube`,
+
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/github`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/stackexchange`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/coursera`,
+	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/ted`,
+}
 
 var officalGFWListURLs = []string{
 	`https://raw.githubusercontents.com/Loukky/gfwlist-by-loukky/master/gfwlist.txt`,
@@ -52,35 +71,6 @@ func customsSort(domains []string, topDomains []string) []string {
 }
 
 const initList = `
-blogspot.com.by
-blogspot.com.ee
-blogspot.com.es
-blogspot.in
-blogspot.kr
-blogspot.mx
-blogspot.my
-blogspot.pe
-blogspot.qa
-blogspot.sg
-blogspot.ug
-google.ac
-google.berlin
-google.cc
-google.com.iq
-google.com.lc
-google.com.nf
-google.com.tn
-google.gf
-google.gp
-google.io
-google.jp
-google.net
-google.ng
-google.org
-google.ph
-google.sg
-google.uk
-google.ventures
 appbridge.ca
 bumptop.ca
 mray.club

@@ -301,9 +301,10 @@ func main() {
 							domains = append(domains, domain.ExtractFromB64(base64Str)...)
 						}
 					}
-					if extraList, err := wGet(officalGoogleDomain); err == nil {
-						extraList += strings.Replace(extraList, "google", "blogspot", -1)
-						topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
+					for it := range communityDomainLists {
+						if extraList, err := wGet(communityDomainLists[it]); err == nil {
+							topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
+						}
 					}
 				} else {
 					ssr, err := ssStruct.ParseSSRFromURI(c.String("proxy"))
@@ -320,10 +321,11 @@ func main() {
 							domains = append(domains, domain.ExtractFromB64(string(base64Str))...)
 						}
 					}
-					if data, _, err := funcSSR.WGet(officalGoogleDomain, 10*time.Second); err == nil {
-						extraList := string(data)
-						extraList += strings.Replace(extraList, "google", "blogspot", -1)
-						topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
+					for it := range communityDomainLists {
+						if data, _, err := funcSSR.WGet(communityDomainLists[it], 10*time.Second); err == nil {
+							extraList := string(data)
+							topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
+						}
 					}
 				}
 
@@ -381,9 +383,10 @@ func main() {
 							domains = append(domains, domain.ExtractFromB64(base64Str)...)
 						}
 					}
-					if extraList, err := wGet(officalGoogleDomain); err == nil {
-						extraList += strings.Replace(extraList, "google", "blogspot", -1)
-						topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
+					for it := range communityDomainLists {
+						if extraList, err := wGet(communityDomainLists[it]); err == nil {
+							topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
+						}
 					}
 				} else {
 					ssr, err := ssStruct.ParseSSRFromURI(c.String("proxy"))
@@ -400,10 +403,11 @@ func main() {
 							domains = append(domains, domain.ExtractFromB64(string(base64Str))...)
 						}
 					}
-					if data, _, err := funcSSR.WGet(officalGoogleDomain, 10*time.Second); err == nil {
-						extraList := string(data)
-						extraList += strings.Replace(extraList, "google", "blogspot", -1)
-						topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
+					for it := range communityDomainLists {
+						if data, _, err := funcSSR.WGet(communityDomainLists[it], 10*time.Second); err == nil {
+							extraList := string(data)
+							topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
+						}
 					}
 				}
 

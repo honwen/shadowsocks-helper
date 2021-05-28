@@ -9,7 +9,8 @@ import (
 	"github.com/honwen/golibs/domain"
 )
 
-const officalGoogleDomain = `https://www.google.com/supported_domains`
+// const officalGoogleDomain = `https://www.google.com/supported_domains`
+const officalGoogleDomain = `https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/google`
 
 var officalGFWListURLs = []string{
 	`https://raw.githubusercontents.com/Loukky/gfwlist-by-loukky/master/gfwlist.txt`,

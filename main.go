@@ -277,80 +277,27 @@ func main() {
 					Name:  "ipset, i",
 					Value: "shadowsocks",
 					Usage: "`NAME` for ipset, set NULL to disable",
-				},
-				cli.StringFlag{
-					Name:  "proxy, p",
-					Usage: "only support [ssr://host:port:protocol:method:obfs:pass]",
-				},
-				cli.StringFlag{
-					Name:  "path, b",
-					Value: defaultSSRPath,
-					Usage: "`PATH` of ssr-local (Need if proxy is not empty)",
 				}},
 			Action: func(c *cli.Context) error {
 				// fmt.Println("dnsmasq task: ", c.String("server"), c.String("ipset"), c.String("proxy"), c.String("path"))
-				var (
-					domains    []string
-					topDomains []string
-					err        error
-				)
-				domains = append(domains, domain.ExtractFromBytes([]byte(initList))...)
-				if len(c.String("proxy")) == 0 {
-					for it := range officalGFWListURLs {
-						if base64Str, err := wGet(officalGFWListURLs[it]); err == nil {
-							domains = append(domains, domain.ExtractFromB64(base64Str)...)
-						}
-					}
-					for it := range communityDomainLists {
-						if extraList, err := wGet(communityDomainLists[it]); err == nil {
-							topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
-						}
-					}
-				} else {
-					ssr, err := ssStruct.ParseSSRFromURI(c.String("proxy"))
-					if err != nil {
-						log.Printf("%+v", err)
-						return nil
-					}
-					funcSSR := ssStruct.FuncSSR{
-						SSR:  *ssr,
-						Path: c.String("path"),
-					}
-					for it := range officalGFWListURLs {
-						if base64Str, _, err := funcSSR.WGet(officalGFWListURLs[it], 10*time.Second); err == nil {
-							domains = append(domains, domain.ExtractFromB64(string(base64Str))...)
-						}
-					}
-					for it := range communityDomainLists {
-						if data, _, err := funcSSR.WGet(communityDomainLists[it], 10*time.Second); err == nil {
-							extraList := string(data)
-							topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
-						}
-					}
-				}
-
-				domains = customsSort(domains, topDomains)
+				domains, err := gfwlist()
 
 				if err != nil {
 					log.Printf("%+v", err)
 				} else {
-					if err != nil {
-						log.Printf("%+v", err)
-					} else {
-						var (
-							str bytes.Buffer
-							w   io.Writer = &str
-						)
-						for i := range domains {
-							io.WriteString(w, fmt.Sprintf("server=/%s/%s\n", domains[i], c.String("server")))
-						}
-						if !strings.EqualFold(c.String("ipset"), "NULL") {
-							for i := range domains {
-								io.WriteString(w, fmt.Sprintf("ipset=/%s/%s\n", domains[i], c.String("ipset")))
-							}
-						}
-						fmt.Println(str.String())
+					var (
+						str bytes.Buffer
+						w   io.Writer = &str
+					)
+					for i := range domains {
+						io.WriteString(w, fmt.Sprintf("server=/%s/%s\n", domains[i], c.String("server")))
 					}
+					if !strings.EqualFold(c.String("ipset"), "NULL") {
+						for i := range domains {
+							io.WriteString(w, fmt.Sprintf("ipset=/%s/%s\n", domains[i], c.String("ipset")))
+						}
+					}
+					fmt.Println(str.String())
 				}
 				return nil
 			},
@@ -359,69 +306,14 @@ func main() {
 			Name:     "gfwlist",
 			Category: "HELPER",
 			Usage:    "generate Domain-List from GFWLIST(online) with SSR-Proxy(optional)",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:  "proxy, p",
-					Usage: "only support [ssr://host:port:protocol:method:obfs:pass]",
-				},
-				cli.StringFlag{
-					Name:  "path, b",
-					Value: defaultSSRPath,
-					Usage: "`PATH` of ssr-local (Need if proxy is not empty)",
-				}},
 			Action: func(c *cli.Context) error {
 				// fmt.Println("gfwlist task: ", c.String("proxy"), c.String("path"))
-				var (
-					domains    []string
-					topDomains []string
-					err        error
-				)
-				domains = append(domains, domain.ExtractFromBytes([]byte(initList))...)
-				if len(c.String("proxy")) == 0 {
-					for it := range officalGFWListURLs {
-						if base64Str, err := wGet(officalGFWListURLs[it]); err == nil {
-							domains = append(domains, domain.ExtractFromB64(base64Str)...)
-						}
-					}
-					for it := range communityDomainLists {
-						if extraList, err := wGet(communityDomainLists[it]); err == nil {
-							topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
-						}
-					}
-				} else {
-					ssr, err := ssStruct.ParseSSRFromURI(c.String("proxy"))
-					if err != nil {
-						log.Printf("%+v", err)
-						return nil
-					}
-					funcSSR := ssStruct.FuncSSR{
-						SSR:  *ssr,
-						Path: c.String("path"),
-					}
-					for it := range officalGFWListURLs {
-						if base64Str, _, err := funcSSR.WGet(officalGFWListURLs[it], 10*time.Second); err == nil {
-							domains = append(domains, domain.ExtractFromB64(string(base64Str))...)
-						}
-					}
-					for it := range communityDomainLists {
-						if data, _, err := funcSSR.WGet(communityDomainLists[it], 10*time.Second); err == nil {
-							extraList := string(data)
-							topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
-						}
-					}
-				}
-
-				domains = customsSort(domains, topDomains)
-
+				domains, err := gfwlist()
 				if err != nil {
 					log.Printf("%+v", err)
 				} else {
 					gfwlist := strings.Join(domains, "\n")
-					if err != nil {
-						log.Printf("%+v", err)
-					} else {
-						fmt.Println(gfwlist)
-					}
+					fmt.Println(gfwlist)
 				}
 				return nil
 			},
@@ -615,6 +507,29 @@ func main() {
 	}
 	app.Run(os.Args)
 	psClean(os.Getpid())
+}
+
+func gfwlist() (domains []string, err error) {
+	topDomains := []string{}
+	domains = append(domains, domain.ExtractFromBytes([]byte(initList))...)
+	for it := range officalGFWListURLs {
+		if base64Str, err := wGet(officalGFWListURLs[it]); err == nil {
+			domains = append(domains, domain.ExtractFromB64(base64Str)...)
+		}
+	}
+	for it := range communityDomainLists {
+		if extraList, err := wGet(communityDomainLists[it]); err == nil {
+			domains = append(domains, domain.ExtractFromBytes([]byte(extraList))...)
+		}
+	}
+	for it := range topDomainLists {
+		if extraList, err := wGet(topDomainLists[it]); err == nil {
+			topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
+		}
+	}
+
+	domains = customsSort(domains, topDomains)
+	return
 }
 
 // Get return text of url

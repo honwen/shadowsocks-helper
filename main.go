@@ -528,7 +528,12 @@ func gfwlist() (domains []string, err error) {
 		}
 	}
 
-	domains = customsSort(domains, topDomains)
+	_domains := []string{}
+	for _, v := range domains {
+		_domains = append(_domains, strings.TrimPrefix(v, "www."))
+	}
+
+	domains = customsSort(_domains, topDomains)
 	return
 }
 

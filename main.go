@@ -18,10 +18,12 @@ import (
 	"time"
 
 	cidrman "github.com/EvilSuperstars/go-cidrman"
+	"github.com/Workiva/go-datastructures/set"
 	"github.com/chenhw2/go-ps" /*ps*/
 	"github.com/chenhw2/shadowsocks-helper/cidr"
 	"github.com/chenhw2/shadowsocks-helper/ssStruct"
 	"github.com/chenhw2/shadowsocks-helper/subscribe"
+	"github.com/honwen/golibs/cip"
 	"github.com/honwen/golibs/domain"
 	"gopkg.in/urfave/cli.v1"
 )
@@ -31,6 +33,7 @@ const ipipCHN = "https://raw.githubusercontent.com/17mon/china_ip_list/master/ch
 var (
 	version        = "MISSING build version [git hash]"
 	defaultSSRPath = "ssr-local"
+	defaultASNs    = cli.Int64Slice{cip.ASN_TENCENT_CN, cip.ASN_ALIBABA_CN, cip.ASN_HINET, cip.ASN_HKBN, cip.ASN_NEWTT, cip.ASN_UHGL}
 )
 
 func init() {
@@ -351,6 +354,44 @@ func main() {
 							fmt.Println(tidelist)
 						}
 					}
+				}
+				return nil
+			},
+		},
+		{
+			Name:     "asn",
+			Category: "HELPER",
+			Usage:    "get IPs of ASN",
+			Flags: []cli.Flag{
+				cli.Int64SliceFlag{
+					Name:  "asn, a",
+					Usage: "Number of ASN",
+					Value: &defaultASNs,
+				},
+				cli.StringFlag{
+					Name:  "output, o",
+					Usage: "path of domain list",
+				}},
+			Action: func(c *cli.Context) error {
+				// fmt.Println("asn task: ", c.Int64Slice("asn"), c.String("output"))
+				asn := c.Int64Slice("asn")
+				ips := set.New()
+				content := ""
+				for _, it := range asn {
+					for _, v := range cip.IPsOfASN(int(it)) {
+						ips.Add(v)
+					}
+				}
+				for _, it := range ips.Flatten() {
+					content += fmt.Sprintln(it)
+				}
+				if len(c.String("output")) > 0 {
+					err := ioutil.WriteFile(c.String("output"), []byte(content), 0644)
+					if err != nil {
+						panic(err)
+					}
+				} else {
+					fmt.Println(content)
 				}
 				return nil
 			},

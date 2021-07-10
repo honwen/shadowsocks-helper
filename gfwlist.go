@@ -18,6 +18,8 @@ var topDomainLists = []string{
 }
 
 var communityDomainLists = []string{
+	`https://raw.githubusercontents.com/pexcn/daily/gh-pages/gfwlist/gfwlist.txt`,
+	`https://raw.githubusercontents.com/pexcn/daily-extras/master/gfwlist-extras.txt`,
 
 	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/android`,
 	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/blogspot`,

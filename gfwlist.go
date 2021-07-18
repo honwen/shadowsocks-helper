@@ -9,91 +9,115 @@ import (
 	"github.com/honwen/golibs/domain"
 )
 
+func init() {
+	originLen := len(topDomainLists)
+	for i := 0; i < originLen; i++ {
+		topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
+		topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com/gh", -1))
+		topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
+	}
+
+	originLen = len(communityDomainLists)
+	for i := 0; i < originLen; i++ {
+		communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
+		communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
+		communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
+	}
+
+	originLen = len(officalGFWListURLs)
+	for i := 0; i < originLen; i++ {
+		officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
+		officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
+		officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
+	}
+
+}
+
 var topDomainLists = []string{
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/google`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/youtube`,
-	// `https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/google-ads`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/google-registry`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/google-scholar`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/youtube`,
+	// `https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-ads`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-registry`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-scholar`,
 }
 
 var communityDomainLists = []string{
-	`https://raw.githubusercontents.com/pexcn/daily/gh-pages/gfwlist/gfwlist.txt`,
-	`https://raw.githubusercontents.com/pexcn/daily-extras/master/gfwlist-extras.txt`,
+	`https://raw.githubusercontent.com/pexcn/daily/gh-pages/gfwlist/gfwlist.txt`,
+	`https://raw.githubusercontent.com/pexcn/daily-extras/master/gfwlist-extras.txt`,
 
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/android`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/blogspot`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/dart`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/fastlane`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/flutter`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/golang`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/polymer`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/v8`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/android`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/blogspot`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/dart`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/fastlane`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/flutter`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/golang`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/polymer`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/v8`,
 
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/github`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/stackexchange`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/coursera`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/ted`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/akamai`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/cdn77`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/cloudflare`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/fastly`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/imgix`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/limelight`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/pagecdn`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/quantil`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/stackpath`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/clubhouse`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/discord`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/freenode`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/intercom`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/line`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/matrix`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/signal`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/slack`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/telegram`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/rarbg`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/github`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/stackexchange`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/coursera`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/ted`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/akamai`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/cdn77`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/cloudflare`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/fastly`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/imgix`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/limelight`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/pagecdn`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/quantil`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/stackpath`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/clubhouse`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/discord`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/freenode`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/intercom`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/line`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/matrix`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/signal`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/slack`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/telegram`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/rarbg`,
 
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/category-pt`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/category-porn`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/bongacams`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/bttzyw`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/ehentai`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/heyzo`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/jable`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/javbus`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/javfinder`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/javwide`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/livejasmin`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/metart`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/pornhub`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/scoreland`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/uu-chat`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/xhamster`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/xnxx`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/xvideos`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/youjizz`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-pt`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-porn`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/bongacams`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/bttzyw`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/ehentai`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/heyzo`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/jable`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/javbus`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/javfinder`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/javwide`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/livejasmin`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/metart`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/pornhub`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/scoreland`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/uu-chat`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/xhamster`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/xnxx`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/xvideos`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/youjizz`,
 
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/category-vpnservices`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/928plus`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/boslife`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/cylink`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/dlercloud`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/duyaoss`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/hitun`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/justmysocks`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/n3ro`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/nexitally`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/paofuyun`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/shadowsockscom`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/squirrelvpn`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/ssrcloud`,
-	`https://raw.githubusercontents.com/v2fly/domain-list-community/master/data/surflite`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-vpnservices`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/928plus`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/boslife`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/cylink`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/dlercloud`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/duyaoss`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/hitun`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/justmysocks`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/n3ro`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/nexitally`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/paofuyun`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/shadowsockscom`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/squirrelvpn`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/ssrcloud`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/surflite`,
 }
 
 var officalGFWListURLs = []string{
-	`https://raw.githubusercontents.com/Loukky/gfwlist-by-loukky/master/gfwlist.txt`,
-	`https://raw.githubusercontents.com/gfwlist/gfwlist/master/gfwlist.txt`,
+	`https://raw.githubusercontent.com/Loukky/gfwlist-by-loukky/master/gfwlist.txt`,
+	`https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt`,
 }
 
 const regxIP = `(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)`

@@ -551,22 +551,65 @@ func main() {
 }
 
 func gfwlist() (domains []string, err error) {
-	topDomains := []string{}
 	domains = append(domains, domain.ExtractFromBytes([]byte(initList))...)
-	for it := range officalGFWListURLs {
-		if base64Str, err := wGet(officalGFWListURLs[it]); err == nil {
-			domains = append(domains, domain.ExtractFromB64(base64Str)...)
-		}
+
+	var (
+		topDomains = []string{}
+		b64len     = len(officalGFWListURLs)
+		comlen     = len(communityDomainLists)
+		b64chan    = make(chan string, b64len)
+		comchan    = make(chan string, comlen)
+
+		toplen  = len(topDomainLists)
+		topchan = make(chan string, toplen)
+	)
+
+	for i := 0; i < b64len; i++ {
+		go func(it int) {
+			if base64Str, err := wGet(officalGFWListURLs[it]); err == nil {
+				b64chan <- base64Str
+			} else {
+				log.Println(err)
+				b64chan <- ""
+			}
+		}(i)
 	}
-	for it := range communityDomainLists {
-		if extraList, err := wGet(communityDomainLists[it]); err == nil {
-			domains = append(domains, domain.ExtractFromBytes([]byte(extraList))...)
-		}
+
+	for i := 0; i < comlen; i++ {
+		go func(it int) {
+			if extraList, err := wGet(communityDomainLists[it]); err == nil {
+				comchan <- extraList
+			} else {
+				log.Println(err)
+				comchan <- ""
+			}
+		}(i)
 	}
-	for it := range topDomainLists {
-		if extraList, err := wGet(topDomainLists[it]); err == nil {
-			topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
-		}
+
+	for i := 0; i < toplen; i++ {
+		go func(it int) {
+			if extraList, err := wGet(topDomainLists[it]); err == nil {
+				topchan <- extraList
+			} else {
+				log.Println(err)
+				topchan <- ""
+			}
+		}(i)
+	}
+
+	for i := 0; i < b64len; i++ {
+		base64Str := <-b64chan
+		domains = append(domains, domain.ExtractFromB64(base64Str)...)
+	}
+
+	for i := 0; i < comlen; i++ {
+		extraList := <-comchan
+		domains = append(domains, domain.ExtractFromBytes([]byte(extraList))...)
+	}
+
+	for i := 0; i < toplen; i++ {
+		extraList := <-topchan
+		topDomains = append(topDomains, domain.ExtractFromBytes([]byte(extraList))...)
 	}
 
 	_domains := []string{}
@@ -585,7 +628,7 @@ func wGet(urlAddr string) (string, error) {
 		return ``, err
 	}
 	client := &http.Client{
-		Timeout: 15 * time.Second,
+		Timeout: 3 * time.Second,
 	}
 	resp, err := client.Do(request)
 	if err != nil {

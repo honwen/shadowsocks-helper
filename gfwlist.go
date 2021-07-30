@@ -139,12 +139,12 @@ func customsSort(domains []string, topDomains []string) []string {
 	domains, ips := filter(domains, func(s string) bool {
 		return regxIPv4.MatchString(s)
 	})
+	filterStr := "|" + strings.Join(topDomains, "|") + "|"
 	domains, extraTops := filter(domains, func(s string) bool {
 		if strings.HasPrefix(s, "google.") || strings.HasPrefix(s, "blogspot.") {
 			return true
 		}
-		i := sort.SearchStrings(topDomains, s)
-		return (i < len(s) && domains[i] == s)
+		return strings.Contains(filterStr, "|"+s+"|")
 	})
 	topDomains = domain.Sort(append(topDomains, extraTops...))
 

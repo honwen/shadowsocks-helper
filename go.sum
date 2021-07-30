@@ -35,8 +35,8 @@ github.com/fatih/structs v1.1.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/go-chi/chi v1.5.3/go.mod h1:Q8xfe6s3fjZyMr8ZTv5jL+vxhVaFyCq2s+RvSfzTD0E=
 github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T20WEQ=
-github.com/honwen/golibs v0.2.3 h1:G6ND6Yb6PlfmyG/45qjTPqqcqTr3mtomJWkYhbh0DPc=
-github.com/honwen/golibs v0.2.3/go.mod h1:3Y6gdQ2RLIxRSNWdkoyRLetrpKJVw1WB421Qt4PLdrA=
+github.com/honwen/golibs v0.2.4 h1:npA/AE0vgIZDpVX4m049wQGGrROpLN07l8GL+NuqEV0=
+github.com/honwen/golibs v0.2.4/go.mod h1:3Y6gdQ2RLIxRSNWdkoyRLetrpKJVw1WB421Qt4PLdrA=
 github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
 github.com/klauspost/cpuid v1.2.1/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/cpuid v1.2.3/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=

@@ -373,15 +373,25 @@ func main() {
 					Usage: "path of domain list",
 				}},
 			Action: func(c *cli.Context) error {
-				// fmt.Println("asn task: ", c.Int64Slice("asn"), c.String("output"))
+				// fmt.Println("asn task: ", c.Int64Slice("asn"), len(c.Int64Slice("asn")), c.String("output"))
 				asn := c.Int64Slice("asn")
 				ips := set.New()
 				content := ""
+
+				rlen := len(asn)
+				rchan := make(chan []string, rlen)
 				for _, it := range asn {
-					for _, v := range cip.IPsOfASN(int(it)) {
+					go func(it int64) {
+						rchan <- cip.IPsOfASN(int(it))
+					}(it)
+				}
+
+				for i := 0; i < rlen; i++ {
+					for _, v := range <-rchan {
 						ips.Add(v)
 					}
 				}
+
 				for _, it := range ips.Flatten() {
 					content += fmt.Sprintln(it)
 				}

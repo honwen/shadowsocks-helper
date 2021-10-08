@@ -51,6 +51,7 @@ var communityDomainLists = []string{
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/fastlane`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/flutter`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/golang`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/kaggle`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/polymer`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/v8`,
 

@@ -14,21 +14,21 @@ func init() {
 	for i := 0; i < originLen; i++ {
 		// topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
 		topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com/gh", -1))
-		topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
+		// topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
 	}
 
 	originLen = len(communityDomainLists)
 	for i := 0; i < originLen; i++ {
 		// communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
 		communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
-		communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
+		// communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
 	}
 
 	originLen = len(officalGFWListURLs)
 	for i := 0; i < originLen; i++ {
 		// officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
 		officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
-		officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
+		// officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
 	}
 
 }
@@ -44,6 +44,7 @@ var topDomainLists = []string{
 var communityDomainLists = []string{
 	`https://raw.githubusercontent.com/pexcn/daily/gh-pages/gfwlist/gfwlist.txt`,
 	`https://raw.githubusercontent.com/pexcn/daily-extras/master/gfwlist-extras.txt`,
+	`https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/gfw.txt`,
 
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/android`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/blogspot`,

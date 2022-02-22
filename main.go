@@ -33,7 +33,7 @@ const ipipCHN = "https://raw.githubusercontent.com/17mon/china_ip_list/master/ch
 var (
 	version        = "MISSING build version [git hash]"
 	defaultSSRPath = "ssr-local"
-	defaultASNs    = cli.Int64Slice{cip.ASN_TENCENT_CN, cip.ASN_ALIBABA_CN, cip.ASN_HINET, cip.ASN_HKBN, cip.ASN_NEWTT, cip.ASN_UHGL, cip.ASN_BCPL_SG} // cip.ASN_MICROSOFT
+	defaultASNs    = cli.Int64Slice{cip.ASN_TENCENT_CN, cip.ASN_ALIBABA_CN, cip.ASN_HINET, cip.ASN_HKBN, cip.ASN_NEWTT, cip.ASN_UHGL, cip.ASN_BCPL_SG, 136038} // cip.ASN_MICROSOFT
 )
 
 func init() {

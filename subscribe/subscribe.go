@@ -154,7 +154,7 @@ func URL2URIs(uri string) (ssrURIs, ssrRemarks []string) {
 func WGetRawFastBySSRProxy(urlAddr, ssrProxyAddr string, timeout time.Duration) ([]byte, time.Duration, error) {
 	request, _ := http.NewRequest("GET", urlAddr, nil)
 	// direct, _ := proxy.NewDirect("", time.Second*3, time.Second*0)
-	direct, _ := proxy.NewDirect("")
+	direct, _ := proxy.NewDirect("", time.Second, time.Second)
 	proxy, err := proxy.DialerFromURL(ssrProxyAddr, direct)
 	if err != nil {
 		log.Fatal(err)

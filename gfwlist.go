@@ -12,6 +12,7 @@ import (
 func init() {
 	originLen := len(topDomainLists)
 	for i := 0; i < originLen; i++ {
+		topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "https://", "https://ghproxy.com/https://", -1))
 		// topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
 		topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com/gh", -1))
 		// topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
@@ -19,6 +20,7 @@ func init() {
 
 	originLen = len(communityDomainLists)
 	for i := 0; i < originLen; i++ {
+		communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "https://", "https://ghproxy.com/https://", -1))
 		// communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
 		communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
 		// communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
@@ -26,6 +28,7 @@ func init() {
 
 	originLen = len(officalGFWListURLs)
 	for i := 0; i < originLen; i++ {
+		officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "https://", "https://ghproxy.com/https://", -1))
 		// officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
 		officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
 		// officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
@@ -120,6 +123,7 @@ var communityDomainLists = []string{
 var officalGFWListURLs = []string{
 	`https://raw.githubusercontent.com/Loukky/gfwlist-by-loukky/master/gfwlist.txt`,
 	`https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt`,
+	// `https://raw.githubusercontent.com/YW5vbnltb3Vz/domain-list-community/release/gfwlist.txt`,
 }
 
 const regxIP = `(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)`

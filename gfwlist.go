@@ -37,6 +37,7 @@ func init() {
 }
 
 var topDomainLists = []string{
+	`https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/google.txt`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/youtube`,
 	// `https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-ads`,
@@ -150,7 +151,7 @@ func customsSort(domains []string, topDomains []string) []string {
 		if strings.HasPrefix(s, "google.") || strings.HasPrefix(s, "blogspot.") {
 			return true
 		}
-		return strings.Contains(filterStr, "|"+s+"|")
+		return strings.Contains(filterStr, "."+s+"|")
 	})
 	topDomains = domain.Sort(append(topDomains, extraTops...))
 
@@ -161,6 +162,29 @@ func customsSort(domains []string, topDomains []string) []string {
 }
 
 const initList = `
+dht.libtorrent.org
+router.bittorrent.com
+router.utorrent.com
+dht.transmissionbt.com
+dht.aelitis.com
+kanetflix.com
+supertop-100.com
+googlers.com
+qatp1.net
+qcpp1.net
+qpdp1.net
+hostloc.me
+hostloc.net
+moeloc.com
+machbbs.com
+asrockind.com
+rakuten.co.jp
+substack.com
+vivaldi.com
+breached.to
+chinafile.com
+business.page
+truenas.com
 appbridge.ca
 bumptop.ca
 mray.club

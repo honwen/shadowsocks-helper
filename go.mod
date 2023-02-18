@@ -9,7 +9,7 @@ require (
 	github.com/chenhw2/go-ps v0.0.0-20161213124314-07c8736d8277
 	github.com/honwen/golibs v0.4.2
 	github.com/nadoo/glider v0.16.2
-	golang.org/x/net v0.2.0
+	golang.org/x/net v0.7.0
 	gopkg.in/urfave/cli.v1 v1.20.0
 )
 
@@ -37,7 +37,7 @@ require (
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/exp v0.0.0-20221114191408-850992195362 // indirect
 	golang.org/x/mod v0.7.0 // indirect
-	golang.org/x/sys v0.2.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/tools v0.3.0 // indirect
 )

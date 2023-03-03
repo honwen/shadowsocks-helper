@@ -14,7 +14,7 @@ func init() {
 	for i := 0; i < originLen; i++ {
 		topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "https://", "https://ghproxy.com/https://", -1))
 		// topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
-		topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com/gh", -1))
+		// topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com/gh", -1))
 		// topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
 	}
 
@@ -22,7 +22,7 @@ func init() {
 	for i := 0; i < originLen; i++ {
 		communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "https://", "https://ghproxy.com/https://", -1))
 		// communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
-		communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
+		// communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
 		// communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
 	}
 
@@ -30,13 +30,14 @@ func init() {
 	for i := 0; i < originLen; i++ {
 		officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "https://", "https://ghproxy.com/https://", -1))
 		// officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
-		officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
+		// officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
 		// officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
 	}
 
 }
 
 var topDomainLists = []string{
+	`https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/google.txt`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/youtube`,
 	// `https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-ads`,
@@ -48,6 +49,12 @@ var communityDomainLists = []string{
 	`https://raw.githubusercontent.com/pexcn/daily/gh-pages/gfwlist/gfwlist.txt`,
 	`https://raw.githubusercontent.com/pexcn/daily-extras/master/gfwlist-extras.txt`,
 	`https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/gfw.txt`,
+	`https://raw.githubusercontent.com/poctopus/gfwlist-plus/master/gfwlist-plus.txt`,
+
+	`https://raw.githubusercontent.com/hy-cs/subTemplate/master/rules/Proxy.list`,
+	`https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Global/Global_Domain.list`,
+
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/openai`,
 
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/android`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/blogspot`,
@@ -83,7 +90,6 @@ var communityDomainLists = []string{
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/telegram`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/rarbg`,
 
-	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-pt`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-porn`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/bongacams`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/bttzyw`,
@@ -103,6 +109,13 @@ var communityDomainLists = []string{
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/xvideos`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/youjizz`,
 
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-pt`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-media`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-novel`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-public-tracker`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-ipfs`,
+	// `https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-dev`,
+	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-anticensorship`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-vpnservices`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/928plus`,
 	`https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/boslife`,
@@ -150,7 +163,7 @@ func customsSort(domains []string, topDomains []string) []string {
 		if strings.HasPrefix(s, "google.") || strings.HasPrefix(s, "blogspot.") {
 			return true
 		}
-		return strings.Contains(filterStr, "|"+s+"|")
+		return strings.Contains(filterStr, "."+s+"|")
 	})
 	topDomains = domain.Sort(append(topDomains, extraTops...))
 
@@ -161,6 +174,96 @@ func customsSort(domains []string, topDomains []string) []string {
 }
 
 const initList = `
+subhdtw.com
+dht.libtorrent.org
+router.bittorrent.com
+router.utorrent.com
+dht.transmissionbt.com
+dht.aelitis.com
+kanetflix.com
+supertop-100.com
+googlers.com
+18comic.vip
+affyun.com
+akamai.secure.force.com
+akstat.io
+appsflyer.com
+arxiv-org.atlassian.net
+cdn.cookielaw.org
+cdn.jsdelivr.net
+code.jquery.com
+collinsdictionary.com
+creamdata.net
+creampanel.com
+deepl.com
+developer.akamai.com
+duyaoss.com
+eepay.ph
+emojipedia.org
+flower.yt
+fmmvibe.com
+fonts.net
+force.com
+fuckimm.com
+gcash.com
+gitbook.com
+gitbook.io
+hcaptcha.com
+herokudns.com
+hostloc.com
+huacloud.icu
+immtel.com
+ip-api.com
+ipify.org
+ipinfo.io
+ip.sb
+isapplesiliconready.com
+javdb.com
+jdbimgs.com
+jdbstatic.com
+jmcomic.mobi
+keeflys.com
+mc.yandex.ru
+metal.prod.atl-paas.net
+missav.com
+mynt.xyz
+orcid.org
+prprcloud.moe
+racknerd.com
+renzhe.cloud
+renzhesub.com
+renzhesubconverter.com
+scholarlyiq.com
+skk.moe
+swiftype.com
+tapecontent.net
+techlab-cdn.com
+tenglong.co
+texon.io
+trakt.tv
+unogs.com
+userstylesapi.com
+vibe.community
+vocab.com
+vocabulary.com
+vps.hosting
+zdassets.com
+zendesk.com
+qatp1.net
+qcpp1.net
+qpdp1.net
+hostloc.me
+hostloc.net
+moeloc.com
+machbbs.com
+asrockind.com
+rakuten.co.jp
+substack.com
+vivaldi.com
+breached.to
+chinafile.com
+business.page
+truenas.com
 appbridge.ca
 bumptop.ca
 mray.club

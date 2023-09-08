@@ -25,7 +25,7 @@ import (
 	"github.com/chenhw2/shadowsocks-helper/subscribe"
 	"github.com/honwen/golibs/cip"
 	"github.com/honwen/golibs/domain"
-	"gopkg.in/urfave/cli.v1"
+	"github.com/urfave/cli"
 )
 
 const ipipCHN = "https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt"

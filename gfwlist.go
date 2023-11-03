@@ -13,7 +13,7 @@ import (
 func init() {
 	originLen := len(topDomainLists)
 	for i := 0; i < originLen; i++ {
-		topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "https://", "https://ghproxy.com/https://", -1))
+		topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "https://", "https://gh-proxy.com/https://", -1))
 		// topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
 		// topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com/gh", -1))
 		// topDomainLists = append(topDomainLists, strings.Replace(topDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
@@ -21,7 +21,7 @@ func init() {
 
 	originLen = len(communityDomainLists)
 	for i := 0; i < originLen; i++ {
-		communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "https://", "https://ghproxy.com/https://", -1))
+		communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "https://", "https://gh-proxy.com/https://", -1))
 		// communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
 		// communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
 		// communityDomainLists = append(communityDomainLists, strings.Replace(communityDomainLists[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))
@@ -29,7 +29,7 @@ func init() {
 
 	originLen = len(officalGFWListURLs)
 	for i := 0; i < originLen; i++ {
-		officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "https://", "https://ghproxy.com/https://", -1))
+		officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "https://", "https://gh-proxy.com/https://", -1))
 		// officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "raw.githubusercontents.com", -1))
 		// officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "cdn.staticaly.com", -1))
 		// officalGFWListURLs = append(officalGFWListURLs, strings.Replace(officalGFWListURLs[i], "raw.githubusercontent.com", "raw.fastgit.org", -1))

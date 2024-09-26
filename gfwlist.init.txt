@@ -1,7 +1,10 @@
+ess.apple.com
+push.apple.com
 ciciai.com
 coze.com
 location.microsoft.com
 subhdtw.com
+ac.uk
 dht.libtorrent.org
 router.bittorrent.com
 router.utorrent.com
